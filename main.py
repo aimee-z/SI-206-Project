@@ -22,7 +22,18 @@ def get_api1():
     print("\nDescription about the key:\n",key)
     pass
 
-# Get GeoKeo API data:
+# Get COVID-19 API data in JS:
+def covid_api():
+    pass
+
+# Get stock API data in JS:
+def stock_api():
+    pass
+
+# Get Yelp API data in JS: (to see how many businesses are in covid heavy areas?)
+
+
+
 
 # idk just included in case we need it?
 def readDataFromFile(filename):
