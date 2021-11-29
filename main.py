@@ -22,6 +22,8 @@ def get_api1():
     print("\nDescription about the key:\n",key)
     pass
 
+# Get GeoKeo API data:
+
 # idk just included in case we need it?
 def readDataFromFile(filename):
     full_path = os.path.join(os.path.dirname(__file__), filename)
