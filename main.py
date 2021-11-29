@@ -10,32 +10,39 @@ import requests
 ## Team Name: Women in Stem
 ## Team Members: Aimee Zheng, Sage Pei, Marina Sun
 
-# Test google API
-# Goal is to get all of our API info into JS format
-def get_api1():
-    response_API = requests.get('https://gmail.googleapis.com/$discovery/rest?version=v1')
-    data = response_API.text
-    parse_json = json.loads(data)
-    info = parse_json['description']
-    print("Info about API:\n", info)
-    key = parse_json['parameters']['key']['description']
-    print("\nDescription about the key:\n",key)
-    pass
 
-# Get COVID-19 API data in JS:
+# Create database
+def setUpDatabase(db_name):
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+db_name)
+    cur = conn.cursor()
+    return cur, conn
+    
+
+# Get COVID-19 API data in JS
 def covid_api():
+    # Request for historic US COVID data
     response_API = requests.get('https://api.covidtracking.com/v2/us/daily.json')
     data = response_API.text
     parse_json = json.loads(data)
-    info = parse_json['data'][0]['date']
-    print("\n\nFirst date included:\n", info)
+    # Check first date to make sure it works lol
+    # info = parse_json['data'][0]['date']
+    # print("\n\nFirst date included:\n", info)
+    return parse_json
+
+# Compile COVID JS data into database
+# data here would be covid_api()
+def set_up_covid(data, cur, con):
+    setUpDatabase('project.db')
+    cur.execute("CREATE TABLE Covid (id INTEGER PRIMARY KEY, title TEXT)")
+
     pass
 
 # Get stock API data in JS:
 def stock_api():
     pass
 
-# Get Yelp API data in JS: (to see how many businesses are in covid heavy areas?)
+# Get EventBrite API data in JS: (to see how many events happen during COVID spikes?)
 
 
 
@@ -50,7 +57,7 @@ def readDataFromFile(filename):
     return json_data
 
 def main():
-    covid_api()
+    set_up_covid()
 
 if __name__ == "__main__":
     main()
