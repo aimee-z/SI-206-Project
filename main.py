@@ -24,6 +24,11 @@ def get_api1():
 
 # Get COVID-19 API data in JS:
 def covid_api():
+    response_API = requests.get('https://api.covidtracking.com/v2/us/daily.json')
+    data = response_API.text
+    parse_json = json.loads(data)
+    info = parse_json['data'][0]['date']
+    print("\n\nFirst date included:\n", info)
     pass
 
 # Get stock API data in JS:
@@ -45,7 +50,7 @@ def readDataFromFile(filename):
     return json_data
 
 def main():
-    get_api1()
+    covid_api()
 
 if __name__ == "__main__":
     main()
