@@ -50,6 +50,19 @@ def set_up_covid(data, cur, conn):
 
 # Get stock API data in JS:
 def stock_api():
+    params = {'access_key': '68deeb901ca7f891572effb4145fe675'}
+
+    api_result = requests.get('https://api.marketstack.com/v1/tickers/aapl/eod', params)
+
+    api_response = api_result.json()
+
+    print(api_result)
+    '''params = {'access_key': '68deeb901ca7f891572effb4145fe675', 'date_from': '2020-01-13', 'date_to': '2021-03-07'}
+    response_API = requests.get('https://api.marketstack.com/v1/tickers/AMZN/eod', params)
+    data = response_API.text
+    parse_json = json.loads(data)
+    print(parse_json)
+    return parse_json'''
     pass
 
 # Get EventBrite API data in JS: (to see how many events happen during COVID spikes?)
@@ -74,7 +87,8 @@ def main():
     covid_data = covid_api()
     set_up_covid(covid_data, cur, conn)
 
-    #
+    # Create AMZN stock table
+    stock_api()
 
 if __name__ == "__main__":
     main()
