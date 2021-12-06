@@ -72,8 +72,17 @@ def stock_api():
     print("\nDescription about the key:\n",key)
     pass 
 
-# Get EventBrite API data in JS: (to see how many events happen during COVID spikes?)
-
+# Get BitcoinAverage API data in JS: (to see how many events happen during COVID spikes?)
+def bitcoin_api():
+    api_key = 'YjM3M2MwOTNmZjUxNDIyMzgwYjVlZmRkZTQzYzU4OGM'
+    base_url = 'https://apiv2.bitcoinaverage.com/indices/'
+    param = {}
+    param['symbol_set'] = 'global'
+    param['symbol'] = 'BTCUSD'
+    param['period'] = 'day'
+    param['format'] = 'json'
+    api2_result = requests.get(base_url, params=param)
+    print(api2_result[0])
 
 
 
