@@ -56,7 +56,7 @@ def stock_api():
 
     api_response = api_result.json()
 
-    print(api_result)
+    #print(api_result)
     '''params = {'access_key': '68deeb901ca7f891572effb4145fe675', 'date_from': '2020-01-13', 'date_to': '2021-03-07'}
     response_API = requests.get('https://api.marketstack.com/v1/tickers/AMZN/eod', params)
     data = response_API.text
@@ -65,19 +65,37 @@ def stock_api():
     return parse_json'''
     pass
 
-# Get BitcoinAverage API data in JS: (to see how many events happen during COVID spikes?)
+# Get BitcoinAverage API data in json format
 def bitcoin_api():
-    api_key = 'YjM3M2MwOTNmZjUxNDIyMzgwYjVlZmRkZTQzYzU4OGM'
-    base_url = 'https://apiv2.bitcoinaverage.com/indices/'
+    base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
     param = {}
-    param['symbol_set'] = 'global'
-    param['symbol'] = 'BTCUSD'
-    param['period'] = 'day'
-    param['format'] = 'json'
+    param['start'] = '2020-01-13'
+    param['end'] = '2021-03-07'
+    param['limit'] = 1
     api2_result = requests.get(base_url, params=param)
-    print(api2_result[0])
+    data2 = api2_result.json()
+    #data2_text = data2.text
+    #parse_json2 = json.loads(data2_text)
+    return data2
 
+def set_up_bitcoin(data2, cur, conn):
+    cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
+    cur.execute('CREATE TABLE "Bitcoin Data"("id" INTEGER PRIMARY KEY, "time_open" TEXT, "time_close" INTEGER, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
 
+    newdata2 = data2
+    count2 = 1
+    for i in newdata2:
+        id2 = count2
+        time_open = i['time_open']
+        time_close = i['time_close']
+        bitcoin_open = i['open']
+        bitcoin_high = i['high']
+        bitcoin_low = i['low']
+        bitcoin_close = i['close']
+        cur.execute('INSERT INTO "Bitcoin Data" (id, time_open, time_close, open, high, low, close) VALUES(?,?,?,?,?,?,?)', (id2, time_open, time_close, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
+        count2 = count2 + 1
+    conn.commit()
+    pass
 
 # idk just included in case we need it?
 def readDataFromFile(filename):
@@ -98,6 +116,10 @@ def main():
 
     # Create AMZN stock table
     stock_api()
+
+    # Create Bitcoin table
+    bitcoin_data = bitcoin_api()
+    set_up_bitcoin(bitcoin_data, cur, conn)
 
 if __name__ == "__main__":
     main()
