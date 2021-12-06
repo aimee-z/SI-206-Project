@@ -1,12 +1,12 @@
 import sqlite3
 import os
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 import numpy as np
 import unittest
 import json
 import requests
 
-## Team Name: Women in Stem
+## Team Name: Women in Stem  
 ## Team Members: Aimee Zheng, Sage Pei, Marina Sun
 
 
@@ -64,6 +64,13 @@ def stock_api():
     print(parse_json)
     return parse_json'''
     pass
+    data = api_response.text
+    parse_json = json.loads(data)
+    info = parse_json['description']
+    print("Info about API:\n", info)
+    key = parse_json['parameters']['key']['description']
+    print("\nDescription about the key:\n",key)
+    pass 
 
 # Get BitcoinAverage API data in json format
 def bitcoin_api():
