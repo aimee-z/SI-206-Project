@@ -126,8 +126,10 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
 def stock_api():
     api_access = '7e4b80cb2b51728a63998f57c1c23629'
     stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
-    api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy').text
-    data3 = json.loads(api3_result)
+    api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy')
+    #data3 = json.loads(api3_result)
+    data3 = api3_result.json()
+    #print(data3)
     return data3
 
 # Create stocks table 
@@ -136,13 +138,15 @@ def set_up_stocks(data3, cur,conn):
     cur.execute('CREATE TABLE "Stocks Data"("name" INTEGER PRIMARY KEY, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
 
     newdata3 = data3 
+    #print(newdata3)
     count3 = 1 
-    for i in newdata3: 
+    for i in newdata3['results']: 
+        #print(i)
         id3 = count3
-        highest_price = i[0][1]
-        lowest_price = i[0][0]
-        trading_volume = i[0][0]
-        transaction_number = i[0][0]
+        highest_price = i['h']
+        lowest_price = i['l']
+        trading_volume = i['v']
+        transaction_number = i['t']
         cur.execute('INSERT INTO "Stocks Data"(name,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
         count3 = count3 + 1 
     conn.commit()
@@ -175,7 +179,7 @@ def main():
 
     # Create Bitcoin table
     bitcoin_data = bitcoin_api()
-    set_up_bitcoin(bitcoin_data, cur, conn)
+    #set_up_bitcoin(bitcoin_data, cur, conn)
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-01-13', '2020-02-06')
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-02-06', '2020-03-01')
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-01', '2020-10-25')
