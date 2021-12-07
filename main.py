@@ -104,12 +104,12 @@ def set_up_stocks(data3, cur,conn):
 
     newdata3 = data3 
     count3 = 1 
-    for i in newdata3: 
-        id3 = count3
-        highest_price = i['h']
-        lowest_price = i['l']
-        trading_volume = i['v']
-        transaction_number = i['t']
+    for i in newdata3:
+        print(i) 
+        highest_price = i['results']#['h']
+        #lowest_price = i['result']['l']
+        #trading_volume = i['results']['v']
+        #transaction_number = i['results']['t']
         cur.execute('INSERT INTO "Stocks Data"(name,highest_price,lowest_price,trading_volume,transaction_number)VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
         count3 = count3 + 1 
     conn.commit()
@@ -151,8 +151,9 @@ def main():
     set_up_covid(covid_data, cur, conn, 452, 476)
     set_up_covid(covid_data, cur, conn, 477, 501)'''
 
-    # Create AMZN stock table
-    # stock_api()
+    # Create stock table
+    stock_data = stock_api()
+    set_up_stocks(stock_data, cur, conn)
 
     # Create Bitcoin table
     #bitcoin_data = bitcoin_api()
