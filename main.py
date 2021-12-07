@@ -127,9 +127,9 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
 
 # Get stock API data in JSON:
 def stock_api():
-    api_access = '7e4b80cb2b51728a63998f57c1c23629'
+    api_access = '48e36d776c40e470ee12e76e5b9bd8cd'
     stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
-    api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy')
+    api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy')
     #data3 = json.loads(api3_result)
     data3 = api3_result.json()
     #print(data3)
@@ -140,8 +140,6 @@ def set_up_stocks(data3, cur,conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
     cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
     
-    
-
     newdata3 = data3 
     #print(newdata3)
     count3 = 1 
@@ -160,7 +158,8 @@ def set_up_stocks(data3, cur,conn):
     date_list = cur.fetchall()
     
     for i in range(1,len(date_list)+1):
-        cur.execute('INSERT INTO "Stocks_Data"(Date) VALUES(?)', ((date_list[i-1][0],i)))
+        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((date_list[i-1][0],i))) 
+        #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i)))
         #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
     conn.commit()
     
@@ -192,6 +191,10 @@ def main():
     # Create stock table
     Stocks_Data = stock_api()
     set_up_stocks(Stocks_Data, cur, conn)
+    set_up_stocks(Stocks_Data, cur, conn, '2020-01-13', '2020-02-06')
+    set_up_stocks(Stocks_Data, cur, conn, '2020-02-06', '2020-03-01')
+    set_up_stocks(Stocks_Data, cur, conn, '2020-10-01', '2020-10-25')
+    set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')
 
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
