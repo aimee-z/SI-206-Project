@@ -138,11 +138,11 @@ def stock_api():
 def stocks_table(data3, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
     cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
-    
-<<<<<<< Updated upstream
+
+   
+
 # Create stocks table 
 def set_up_stocks(data3, cur,conn, start3, end3):
-=======
     cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
     date_list = cur.fetchall()
     
@@ -151,15 +151,14 @@ def set_up_stocks(data3, cur,conn, start3, end3):
         #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i)))
         #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
     conn.commit()
->>>>>>> Stashed changes
-    
+
     newdata3 = data3 
     #print(newdata3)
     count3 = 1 
     flag3 = False
 
-    for i in newdata3:
-        time_open = i['Date']
+    for i in newdata3['results']:
+        time_open = i['']
         
         if time_open < start3:
             count3 = count3 + 1
@@ -172,7 +171,6 @@ def set_up_stocks(data3, cur,conn, start3, end3):
                 flag3 = False
 
 
-    
     for i in newdata3['results']: 
         #print(i)
         id3 = count3
