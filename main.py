@@ -69,9 +69,14 @@ def stock_api():
 def set_up_stocks(data3, cur,conn):
     cur.execute('DROP TABLE IF EXISTS "VALUES"')
     cur.execute('CREATE TABLE "Bitcoin Data"("name" INTEGER PRIMARY KEY, "max" INTEGER, "min" INTEGER,"time_open" TEXT, "time_close" TEXT, "trade_amounts" INTEGER)')
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
 
 # Get BitcoinAverage API data in JSON
+=======
+
+# Get BitcoinAverage API data in json format
+>>>>>>> Stashed changes
 def bitcoin_api():
     base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
     param = {}
