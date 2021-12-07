@@ -138,7 +138,9 @@ def stock_api():
 # Create stocks table 
 def set_up_stocks(data3, cur,conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks Data"')
-    cur.execute('CREATE TABLE "Stocks Data"("name" INTEGER PRIMARY KEY, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
+    cur.execute('CREATE TABLE "Stocks Data"("name" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
+    
+    
 
     newdata3 = data3 
     #print(newdata3)
@@ -152,7 +154,10 @@ def set_up_stocks(data3, cur,conn):
         transaction_number = i['t']
         cur.execute('INSERT INTO "Stocks Data"(name,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
         count3 = count3 + 1 
-    conn.commit()
+
+    
+
+    
     
 # RANDOM CODE
 def readDataFromFile(filename):
