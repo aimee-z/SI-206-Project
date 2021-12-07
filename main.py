@@ -70,7 +70,7 @@ def set_up_covid(data, cur, conn, start, end):
     pass
 
 
-# Get BitcoinAverage JSON data
+# Get Bitcoin JSON data
 def bitcoin_api():
     base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
     param = {}
@@ -83,22 +83,36 @@ def bitcoin_api():
     #parse_json2 = json.loads(data2_text)
     return data2
 
-# Compile BitcoinAverage JSON data into database
-def set_up_bitcoin(data2, cur, conn):
+# Compile Bitcoin JSON data into database
+def set_up_bitcoin(data2, cur, conn, start2, end2):
     cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
-    cur.execute('CREATE TABLE "Bitcoin Data"("id" INTEGER PRIMARY KEY, "time_open" TEXT, "time_close" INTEGER, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
+    cur.execute('CREATE TABLE "Bitcoin Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
 
     newdata2 = data2
     count2 = 1
+    flag2 = False
+
     for i in newdata2:
+        time_open = i['time_open'][0:10]
+            
+        if time_open < start2:
+            count2 = count2 + 1
+            flag2 = True
+            pass
+
+        elif time_open <= end2:
+            if flag2 == True:
+                count2 = count2 + 1
+                flag2 = False
+                    
         id2 = count2
-        time_open = i['time_open']
-        time_close = i['time_close']
+        time_open = i['time_open'][0:10]
+        #time_close = i['time_close']
         bitcoin_open = i['open']
         bitcoin_high = i['high']
         bitcoin_low = i['low']
         bitcoin_close = i['close']
-        cur.execute('INSERT INTO "Bitcoin Data" (id, time_open, time_close, open, high, low, close) VALUES(?,?,?,?,?,?,?)', (id2, time_open, time_close, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
+        cur.execute('INSERT INTO "Bitcoin Data" (id, date, open, high, low, close) VALUES(?,?,?,?,?,?)', (id2, time_open, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
         count2 = count2 + 1
     conn.commit()
     pass
@@ -152,12 +166,16 @@ def main():
     set_up_covid(covid_data, cur, conn, '2020-10-26', '2020-11-19')
 
     # Create stock table
-    #stock_data = stock_api()
-    #set_up_stocks(stock_data, cur, conn)
+    # stock_data = stock_api()
+    # set_up_stocks(stock_data, cur, conn)
 
     # Create Bitcoin table
     bitcoin_data = bitcoin_api()
     set_up_bitcoin(bitcoin_data, cur, conn)
+    set_up_bitcoin(bitcoin_data, cur, conn, '2020-01-13', '2020-02-06')
+    set_up_bitcoin(bitcoin_data, cur, conn, '2020-02-06', '2020-03-01')
+    set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-01', '2020-10-25')
+    set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-26', '2020-11-19')
 
 if __name__ == "__main__":
     main()
