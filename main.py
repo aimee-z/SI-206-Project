@@ -139,8 +139,19 @@ def stocks_table(data3, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
     cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
     
+<<<<<<< Updated upstream
 # Create stocks table 
 def set_up_stocks(data3, cur,conn, start3, end3):
+=======
+    cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
+    date_list = cur.fetchall()
+    
+    for i in range(1,len(date_list)+1):
+        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((date_list[i-1][0],i))) 
+        #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i)))
+        #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
+    conn.commit()
+>>>>>>> Stashed changes
     
     newdata3 = data3 
     #print(newdata3)
@@ -161,6 +172,7 @@ def set_up_stocks(data3, cur,conn, start3, end3):
                 flag3 = False
 
 
+    
     for i in newdata3['results']: 
         #print(i)
         id3 = count3
@@ -171,18 +183,6 @@ def set_up_stocks(data3, cur,conn, start3, end3):
         cur.execute('INSERT INTO "Stocks_Data"(date_id,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
         count3 = count3 + 1 
 
-    cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
-    
-    date_list = cur.fetchall()
-    
-    for i in range(1,len(date_list)+1):
-        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((date_list[i-1][0],i))) 
-        #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i)))
-        #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
-    conn.commit()
-    
-
-    
     
 # RANDOM CODE
 def readDataFromFile(filename):
