@@ -55,28 +55,6 @@ def set_up_covid(data, cur, conn, start, end):
     conn.commit()
     pass
 
-<<<<<<< Updated upstream
-
-=======
-# Get stock API data in JS:
-def stock_api():
-    api_access = '7e4b80cb2b51728a63998f57c1c23629'
-    stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
-    response = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy').text
-    response_info = json.loads(response)
-    return response_info
-#stocks table 
-def set_up_stocks(data3, cur,conn):
-    cur.execute('DROP TABLE IF EXISTS "VALUES"')
-    cur.execute('CREATE TABLE "Bitcoin Data"("name" INTEGER PRIMARY KEY, "max" INTEGER, "min" INTEGER,"time_open" TEXT, "time_close" TEXT, "trade_amounts" INTEGER)')
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-
-# Get BitcoinAverage API data in JSON
-=======
-
-# Get BitcoinAverage API data in json format
->>>>>>> Stashed changes
 def bitcoin_api():
     base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
     param = {}
@@ -113,27 +91,30 @@ def set_up_bitcoin(data2, cur, conn):
 
 # Get stock API data in JS:
 def stock_api():
-    params = {'access_key': '68deeb901ca7f891572effb4145fe675'}
+    api_access = '7e4b80cb2b51728a63998f57c1c23629'
+    stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
+    api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy').text
+    data3 = json.loads(api3_result)
+    return data3
 
-    api_result = requests.get('https://api.marketstack.com/v1/tickers/aapl/eod', params)
+#stocks table 
+def set_up_stocks(data3, cur,conn):
+    cur.execute('DROP TABLE IF EXISTS "Stocks Data"')
+    cur.execute('CREATE TABLE "Stocks Data"("name" INTEGER PRIMARY KEY, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
 
-    api_response = api_result.json()
-
-    #print(api_result)
-    '''params = {'access_key': '68deeb901ca7f891572effb4145fe675', 'date_from': '2020-01-13', 'date_to': '2021-03-07'}
-    response_API = requests.get('https://api.marketstack.com/v1/tickers/AMZN/eod', params)
-    data = response_API.text
-    parse_json = json.loads(data)
-    print(parse_json)
-    return parse_json'''
-    pass
-    data = api_response.text
-    parse_json = json.loads(data)
-    info = parse_json['description']
-    print("Info about API:\n", info)
-    key = parse_json['parameters']['key']['description']
-    print("\nDescription about the key:\n",key)
-    pass 
+    newdata3 = data3 
+    count3 = 1 
+    for i in newdata3: 
+        id3 = count3
+        highest_price = i['h']
+        lowest_price = i['l']
+        trading_volume = i['v']
+        transaction_number = i['t']
+        cur.execute('INSERT INTO "Stocks Data"(name,highest_price,lowest_price,trading_volume,transaction_number)VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
+        count3 = count3 + 1 
+    conn.commit()
+    
+    
 
 def readDataFromFile(filename):
     full_path = os.path.join(os.path.dirname(__file__), filename)
