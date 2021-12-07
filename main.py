@@ -131,10 +131,25 @@ def main():
     covid_data = covid_api()
     covid_table(covid_data, cur, conn)
     set_up_covid(covid_data, cur, conn, 1, 26)
-    set_up_covid(covid_data, cur, conn, 27, 51)
+    
+    '''set_up_covid(covid_data, cur, conn, 27, 51)
     set_up_covid(covid_data, cur, conn, 52, 76)
     set_up_covid(covid_data, cur, conn, 77, 101)
-    
+    set_up_covid(covid_data, cur, conn, 102, 126)
+    set_up_covid(covid_data, cur, conn, 127, 176)
+    set_up_covid(covid_data, cur, conn, 177, 201)
+    set_up_covid(covid_data, cur, conn, 202, 226)
+    set_up_covid(covid_data, cur, conn, 227, 251)
+    set_up_covid(covid_data, cur, conn, 252, 276)
+    set_up_covid(covid_data, cur, conn, 277, 301)
+    set_up_covid(covid_data, cur, conn, 302, 326)
+    set_up_covid(covid_data, cur, conn, 327, 351)
+    set_up_covid(covid_data, cur, conn, 352, 376)
+    set_up_covid(covid_data, cur, conn, 377, 401)
+    set_up_covid(covid_data, cur, conn, 426, 451)
+    set_up_covid(covid_data, cur, conn, 452, 476)
+    set_up_covid(covid_data, cur, conn, 477, 501)'''
+
     # Create AMZN stock table
     # stock_api()
 
