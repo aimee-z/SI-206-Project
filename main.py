@@ -83,10 +83,13 @@ def bitcoin_api():
     #parse_json2 = json.loads(data2_text)
     return data2
 
-# Compile Bitcoin JSON data into database
-def set_up_bitcoin(data2, cur, conn, start2, end2):
+# Create Bitcoin Table
+def bitcoin_table(data2, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
     cur.execute('CREATE TABLE "Bitcoin Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
+
+# Compile Bitcoin JSON data into database
+def set_up_bitcoin(data2, cur, conn, start2, end2):
 
     newdata2 = data2
     count2 = 1
@@ -177,9 +180,9 @@ def main():
     stock_data = stock_api()
     set_up_stocks(stock_data, cur, conn)
 
-    # Create Bitcoin table
+    # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
-    #set_up_bitcoin(bitcoin_data, cur, conn)
+    bitcoin_table(bitcoin_data, cur, conn)
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-01-13', '2020-02-06')
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-02-06', '2020-03-01')
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-01', '2020-10-25')
