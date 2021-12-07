@@ -30,8 +30,8 @@ def covid_api():
 
 # Create COVID table
 def covid_table(data, cur, conn):
-    cur.execute('DROP TABLE IF EXISTS "COVID Data"')
-    cur.execute('CREATE TABLE "COVID Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
+    cur.execute('DROP TABLE IF EXISTS "COVID_Data"')
+    cur.execute('CREATE TABLE "COVID_Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
 
 # Compile COVID JSON data into database
 def set_up_covid(data, cur, conn, start, end):
@@ -60,7 +60,7 @@ def set_up_covid(data, cur, conn, start, end):
             change_in_population = i['cases']['total']['calculated']['change_from_prior_day']
             hospitalized = i['outcomes']['hospitalized']['currently']['value']
             deaths = i['outcomes']['death']['total']['value']
-            cur.execute('INSERT INTO "Covid Data" (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
+            cur.execute('INSERT INTO "Covid_Data" (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
             count = count + 1
 
         else:
@@ -137,8 +137,8 @@ def stock_api():
 
 # Create stocks table 
 def set_up_stocks(data3, cur,conn):
-    cur.execute('DROP TABLE IF EXISTS "Stocks Data"')
-    cur.execute('CREATE TABLE "Stocks Data"("name" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
+    cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
+    cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
     
     
 
@@ -152,9 +152,17 @@ def set_up_stocks(data3, cur,conn):
         lowest_price = i['l']
         trading_volume = i['v']
         transaction_number = i['t']
-        cur.execute('INSERT INTO "Stocks Data"(name,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
+        cur.execute('INSERT INTO "Stocks_Data"(date_id,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
         count3 = count3 + 1 
 
+    cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
+    
+    date_list = cur.fetchall()
+    
+    for i in range(1,len(date_list)+1):
+        cur.execute('INSERT INTO "Stocks_Data"(Date) VALUES(?)', ((date_list[i-1][0],i)))
+        #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
+    conn.commit()
     
 
     
@@ -182,8 +190,8 @@ def main():
     set_up_covid(covid_data, cur, conn, '2020-10-26', '2020-11-19')
 
     # Create stock table
-    stock_data = stock_api()
-    set_up_stocks(stock_data, cur, conn)
+    Stocks_Data = stock_api()
+    set_up_stocks(Stocks_Data, cur, conn)
 
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
