@@ -105,15 +105,19 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
                 count2 = count2 + 1
                 flag2 = False
                     
-        id2 = count2
-        time_open = i['time_open'][0:10]
-        #time_close = i['time_close']
-        bitcoin_open = i['open']
-        bitcoin_high = i['high']
-        bitcoin_low = i['low']
-        bitcoin_close = i['close']
-        cur.execute('INSERT INTO "Bitcoin Data" (id, date, open, high, low, close) VALUES(?,?,?,?,?,?)', (id2, time_open, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
-        count2 = count2 + 1
+            id2 = count2
+            time_open = i['time_open'][0:10]
+            #time_close = i['time_close']
+            bitcoin_open = i['open']
+            bitcoin_high = i['high']
+            bitcoin_low = i['low']
+            bitcoin_close = i['close']
+            cur.execute('INSERT INTO "Bitcoin Data" (id, date, open, high, low, close) VALUES(?,?,?,?,?,?)', (id2, time_open, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
+            count2 = count2 + 1
+
+        else:
+            break
+
     conn.commit()
     pass
 
