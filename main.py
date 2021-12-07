@@ -135,11 +135,12 @@ def stock_api():
     #print(data3)
     return data3
 
-# Create stocks table 
-def set_up_stocks(data3, cur,conn,start3,end3):
+def stocks_table(data3, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
     cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
     
+# Create stocks table 
+def set_up_stocks(data3, cur,conn, start3, end3):
     
     newdata3 = data3 
     #print(newdata3)
@@ -147,8 +148,8 @@ def set_up_stocks(data3, cur,conn,start3,end3):
     flag3 = False
 
     for i in newdata3:
-        time_open = i['Date'][0:10]
-            
+        time_open = i['Date']
+        
         if time_open < start3:
             count3 = count3 + 1
             flag3 = True
@@ -207,7 +208,7 @@ def main():
 
     # Create stock table
     Stocks_Data = stock_api()
-    stock_api(Stocks_Data,cur,conn)
+    stocks_table(Stocks_Data,cur,conn)
     set_up_stocks(Stocks_Data, cur, conn, '2020-01-13', '2020-02-06')
     set_up_stocks(Stocks_Data, cur, conn, '2020-02-06', '2020-03-01')
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-01', '2020-10-25')
