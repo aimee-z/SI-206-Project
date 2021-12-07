@@ -38,23 +38,39 @@ def set_up_covid(data, cur, conn, start, end):
     newdata = data['data']
     newdata.sort(key = lambda x:x['date'])
 
-    count = start
+    count = 1
+    flag = False
 
     for i in newdata:
-        id = count
         date = i['date']
-        total_cases = i['cases']['total']['value']
-        case_percent_population = i['cases']['total']['calculated']['population_percent']
-        change_in_population = i['cases']['total']['calculated']['change_from_prior_day']
-        hospitalized = i['outcomes']['hospitalized']['currently']['value']
-        deaths = i['outcomes']['death']['total']['value']
-        cur.execute('INSERT INTO "Covid Data" (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
-        count = count + 1
-        if count == end:
+
+        if date < start:
+            count = count + 1
+            flag = True
+            pass
+
+        elif date <= end:
+            if flag == True:
+                count = count + 1
+                flag = False
+            id = count
+            date = i['date']
+            total_cases = i['cases']['total']['value']
+            case_percent_population = i['cases']['total']['calculated']['population_percent']
+            change_in_population = i['cases']['total']['calculated']['change_from_prior_day']
+            hospitalized = i['outcomes']['hospitalized']['currently']['value']
+            deaths = i['outcomes']['death']['total']['value']
+            cur.execute('INSERT INTO "Covid Data" (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
+            count = count + 1
+
+        else:
             break
+        
     conn.commit()
     pass
 
+
+# Get BitcoinAverage JSON data
 def bitcoin_api():
     base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
     param = {}
@@ -87,9 +103,8 @@ def set_up_bitcoin(data2, cur, conn):
     conn.commit()
     pass
 
-# BELOW: RANDOM CODE IN CASE WE NEED IT
 
-# Get stock API data in JS:
+# Get stock API data in JSON:
 def stock_api():
     api_access = '7e4b80cb2b51728a63998f57c1c23629'
     stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
@@ -97,7 +112,7 @@ def stock_api():
     data3 = json.loads(api3_result)
     return data3
 
-#stocks table 
+# Create stocks table 
 def set_up_stocks(data3, cur,conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks Data"')
     cur.execute('CREATE TABLE "Stocks Data"("name" INTEGER PRIMARY KEY, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
@@ -114,8 +129,7 @@ def set_up_stocks(data3, cur,conn):
         count3 = count3 + 1 
     conn.commit()
     
-    
-
+# RANDOM CODE
 def readDataFromFile(filename):
     full_path = os.path.join(os.path.dirname(__file__), filename)
     f = open(full_path)
@@ -124,6 +138,7 @@ def readDataFromFile(filename):
     json_data = json.loads(file_data)
     return json_data
 
+
 def main():
 
     cur, conn = setUpDatabase('project.db')
@@ -131,33 +146,18 @@ def main():
     # Create COVID table
     covid_data = covid_api()
     covid_table(covid_data, cur, conn)
-    set_up_covid(covid_data, cur, conn, 1, 26)
-
-    '''set_up_covid(covid_data, cur, conn, 27, 51)
-    set_up_covid(covid_data, cur, conn, 52, 76)
-    set_up_covid(covid_data, cur, conn, 77, 101)
-    set_up_covid(covid_data, cur, conn, 102, 126)
-    set_up_covid(covid_data, cur, conn, 127, 176)
-    set_up_covid(covid_data, cur, conn, 177, 201)
-    set_up_covid(covid_data, cur, conn, 202, 226)
-    set_up_covid(covid_data, cur, conn, 227, 251)
-    set_up_covid(covid_data, cur, conn, 252, 276)
-    set_up_covid(covid_data, cur, conn, 277, 301)
-    set_up_covid(covid_data, cur, conn, 302, 326)
-    set_up_covid(covid_data, cur, conn, 327, 351)
-    set_up_covid(covid_data, cur, conn, 352, 376)
-    set_up_covid(covid_data, cur, conn, 377, 401)
-    set_up_covid(covid_data, cur, conn, 426, 451)
-    set_up_covid(covid_data, cur, conn, 452, 476)
-    set_up_covid(covid_data, cur, conn, 477, 501)'''
+    set_up_covid(covid_data, cur, conn, '2020-01-13', '2020-02-06')
+    set_up_covid(covid_data, cur, conn, '2020-02-06', '2020-03-01')
+    set_up_covid(covid_data, cur, conn, '2020-10-01', '2020-10-25')
+    set_up_covid(covid_data, cur, conn, '2020-10-26', '2020-11-19')
 
     # Create stock table
-    stock_data = stock_api()
-    set_up_stocks(stock_data, cur, conn)
+    #stock_data = stock_api()
+    #set_up_stocks(stock_data, cur, conn)
 
     # Create Bitcoin table
-    #bitcoin_data = bitcoin_api()
-    #set_up_bitcoin(bitcoin_data, cur, conn)
+    bitcoin_data = bitcoin_api()
+    set_up_bitcoin(bitcoin_data, cur, conn)
 
 if __name__ == "__main__":
     main()
