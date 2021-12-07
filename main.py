@@ -18,7 +18,8 @@ def setUpDatabase(db_name):
     return cur, conn
     
 
-# Get COVID-19 API data in JS
+
+# Get COVID-19 API data in JSON
 def covid_api():
     # Request for historic US COVID data
     response_API = requests.get('https://api.covidtracking.com/v2/us/daily.json')
@@ -26,18 +27,21 @@ def covid_api():
     parse_json = json.loads(data)
     return parse_json
 
-# Compile COVID JS data into database
-def set_up_covid(data, cur, conn):
-    # is there something suspicious abt dropping table if exist? read project specs
+# Create COVID table
+def covid_table(data, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "COVID Data"')
     cur.execute('CREATE TABLE "COVID Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
 
+# Compile COVID JSON data into database
+def set_up_covid(data, cur, conn, start, end):
     newdata = data['data']
-    count = 1
+    newdata.sort(key = lambda x:x['date'])
+
+    count = start
+    row_count = 1
     for i in newdata:
         id = count
         date = i['date']
-        # may need to trim down to 341 dates (4/2/20), too many dates for other missing data points
         total_cases = i['cases']['total']['value']
         case_percent_population = i['cases']['total']['calculated']['population_percent']
         change_in_population = i['cases']['total']['calculated']['change_from_prior_day']
@@ -45,8 +49,47 @@ def set_up_covid(data, cur, conn):
         deaths = i['outcomes']['death']['total']['value']
         cur.execute('INSERT INTO "Covid Data" (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
         count = count + 1
+        if count == end:
+            break
     conn.commit()
     pass
+
+
+
+# Get BitcoinAverage API data in JSON
+def bitcoin_api():
+    base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
+    param = {}
+    param['start'] = '2020-01-13'
+    param['end'] = '2021-03-07'
+    param['limit'] = 1
+    api2_result = requests.get(base_url, params=param)
+    data2 = api2_result.json()
+    #data2_text = data2.text
+    #parse_json2 = json.loads(data2_text)
+    return data2
+
+# Compile BitcoinAverage JSON data into database
+def set_up_bitcoin(data2, cur, conn):
+    cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
+    cur.execute('CREATE TABLE "Bitcoin Data"("id" INTEGER PRIMARY KEY, "time_open" TEXT, "time_close" INTEGER, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
+
+    newdata2 = data2
+    count2 = 1
+    for i in newdata2:
+        id2 = count2
+        time_open = i['time_open']
+        time_close = i['time_close']
+        bitcoin_open = i['open']
+        bitcoin_high = i['high']
+        bitcoin_low = i['low']
+        bitcoin_close = i['close']
+        cur.execute('INSERT INTO "Bitcoin Data" (id, time_open, time_close, open, high, low, close) VALUES(?,?,?,?,?,?,?)', (id2, time_open, time_close, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
+        count2 = count2 + 1
+    conn.commit()
+    pass
+
+# BELOW: RANDOM CODE IN CASE WE NEED IT
 
 # Get stock API data in JS:
 def stock_api():
@@ -72,39 +115,6 @@ def stock_api():
     print("\nDescription about the key:\n",key)
     pass 
 
-# Get BitcoinAverage API data in json format
-def bitcoin_api():
-    base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
-    param = {}
-    param['start'] = '2020-01-13'
-    param['end'] = '2021-03-07'
-    param['limit'] = 1
-    api2_result = requests.get(base_url, params=param)
-    data2 = api2_result.json()
-    #data2_text = data2.text
-    #parse_json2 = json.loads(data2_text)
-    return data2
-
-def set_up_bitcoin(data2, cur, conn):
-    cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
-    cur.execute('CREATE TABLE "Bitcoin Data"("id" INTEGER PRIMARY KEY, "time_open" TEXT, "time_close" INTEGER, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
-
-    newdata2 = data2
-    count2 = 1
-    for i in newdata2:
-        id2 = count2
-        time_open = i['time_open']
-        time_close = i['time_close']
-        bitcoin_open = i['open']
-        bitcoin_high = i['high']
-        bitcoin_low = i['low']
-        bitcoin_close = i['close']
-        cur.execute('INSERT INTO "Bitcoin Data" (id, time_open, time_close, open, high, low, close) VALUES(?,?,?,?,?,?,?)', (id2, time_open, time_close, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
-        count2 = count2 + 1
-    conn.commit()
-    pass
-
-# idk just included in case we need it?
 def readDataFromFile(filename):
     full_path = os.path.join(os.path.dirname(__file__), filename)
     f = open(full_path)
@@ -119,14 +129,18 @@ def main():
 
     # Create COVID table
     covid_data = covid_api()
-    set_up_covid(covid_data, cur, conn)
-
+    covid_table(covid_data, cur, conn)
+    set_up_covid(covid_data, cur, conn, 1, 26)
+    set_up_covid(covid_data, cur, conn, 27, 51)
+    set_up_covid(covid_data, cur, conn, 52, 76)
+    set_up_covid(covid_data, cur, conn, 77, 101)
+    
     # Create AMZN stock table
-    stock_api()
+    # stock_api()
 
     # Create Bitcoin table
-    bitcoin_data = bitcoin_api()
-    set_up_bitcoin(bitcoin_data, cur, conn)
+    #bitcoin_data = bitcoin_api()
+    #set_up_bitcoin(bitcoin_data, cur, conn)
 
 if __name__ == "__main__":
     main()
