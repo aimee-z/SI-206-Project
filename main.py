@@ -151,8 +151,9 @@ def main():
     set_up_covid(covid_data, cur, conn, 452, 476)
     set_up_covid(covid_data, cur, conn, 477, 501)'''
 
-    # Create AMZN stock table
-    # stock_api()
+    # Create stock table
+    stock_data = stock_api()
+    set_up_stocks(stock_data, cur, conn)
 
     # Create Bitcoin table
     #bitcoin_data = bitcoin_api()
