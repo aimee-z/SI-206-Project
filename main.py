@@ -106,10 +106,10 @@ def set_up_stocks(data3, cur,conn):
     count3 = 1 
     for i in newdata3: 
         id3 = count3
-        highest_price = i['h']
-        lowest_price = i['l']
-        trading_volume = i['v']
-        transaction_number = i['t']
+        highest_price = i['results']['h']
+        lowest_price = i['results']['l']
+        trading_volume = i['results']['v']
+        transaction_number = i['results']['t']
         cur.execute('INSERT INTO "Stocks Data"(name,highest_price,lowest_price,trading_volume,transaction_number)VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
         count3 = count3 + 1 
     conn.commit()
