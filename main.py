@@ -38,7 +38,7 @@ def set_up_covid(data, cur, conn, start, end):
     newdata.sort(key = lambda x:x['date'])
 
     count = start
-    row_count = 1
+
     for i in newdata:
         id = count
         date = i['date']
@@ -131,7 +131,7 @@ def main():
     covid_data = covid_api()
     covid_table(covid_data, cur, conn)
     set_up_covid(covid_data, cur, conn, 1, 26)
-    
+
     '''set_up_covid(covid_data, cur, conn, 27, 51)
     set_up_covid(covid_data, cur, conn, 52, 76)
     set_up_covid(covid_data, cur, conn, 77, 101)
