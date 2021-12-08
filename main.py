@@ -131,56 +131,63 @@ def stock_api():
     api_access = '48e36d776c40e470ee12e76e5b9bd8cd'
     stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
     api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy')
+    #data3 = json.loads(api3_result)
     data3 = api3_result.json()
+    #print(data3)
     return data3
 
-def stocks_table(data3, cur, conn): 
-    cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
-    cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER, "Date" TEXT, "highest_price" REAL, "lowest_price" REAL,"trading_volume" REAL, "transaction_number" INTEGER)')
-    
 # Create stocks table 
-def set_up_stocks(data3, cur,conn, start3, end3):
-    topValue = stock_api(data3)
-    cur.execute("""INSERT INTO Stocks_Data (date_id, Date SELECT id, date FROM Covid_Data""")
-
-    for i in data3['results']: 
-        #print(i)
-        highest_price = i['h']
-        print(highest_price)
-        lowest_price = i['l']
-        trading_volume = i['v']
-        transaction_number = i['t'] 
-        cur.execute("""UPDATE Stocks_Data SET (highest_price) = ?""", (highest_price,))
-        cur.execute("""UPDATE Stocks_Data SET (lowest_price) = ?""", (lowest_price,))
-        cur.execute("""UPDATE Stocks_Data SET (trading_volume) = ?""", (trading_volume,))
-        cur.execute("""UPDATE Stocks_Data SET (transaction_number) = ?""", (transaction_number,))
+def stocks_table(key, cur, conn):
+    stocks_dict = stock_api()
     
-    selected = []
-    for i in range(0,2):
-        for j in range(0,25):
-            j = j + (25 * i)
-            date_id = topValue[j][1]
-            if date_id not in selected:
-                selected.append(date_id)
-                data3 = stock_api(j)
-                cur.execute('INSERT INTO Date VALUES(?,?,?,?,?)',data3[j])
-                conn.commit()
+    cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
+    cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
+    key = 1 
+    
+    lastkey = cur.fetchone()[0]
+    while key < 26: 
+        for i in stocks_dict['results']:
+            if key < 26:
+                highest_price = i['h']
+                lowest_price = i['l']
+                trading_volume = i['v']
+                transaction_number = i['t']
+                #wrong parameter?? 
+                cur.execute('INSERT OR IGNORE INTO "Stocks_Data"(date_id,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(key,highest_price,lowest_price,trading_volume,transaction_number))
+        key = key + 1 
+    #note: maybe try to delete data sets from within the time frame that matches id using a for loop & Select Delete Conditional after loading in data  ? 
 
+    #adding in dates list to stocks_data 
+    cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
+    date_list = cur.fetchall()
+    for i in range(1,len(date_list)+1):
+        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((date_list[i-1][0],i))) 
+        #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i)))
+        #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
+    conn.commit()
+
+    #print(newdata3)
+
+    #25 limiter 
+    cur.execute('SELECT * FROM Stocks_Data LIMIT 25')
+    selected_list = cur.fetchall()
+
+    #print(selected_list)
+
+    #for i in range(1,len(selected_list)):
+   #     cur.execute('DELETE Stocks_Data set Date = ? where date_id = ? ',((selected_list[i-1][0],i))) 
+   # conn.commit()
+
+
+        
+
+    ''' for i in newdata3:
+        
+        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((selected_list[i-1][0],i)))
+    conn.commit()
+    '''
 
             
-        '''
-    count3 = 1 
-    flag3 = False
-    for i in newdata3:
-        time_open = i['Date']
-        if time_open < start3:
-            count3 = count3 + 1
-            flag3 = True
-            pass
-        elif time_open <= end3:
-            if flag3 == True:
-                count3 = count3 + 1
-                flag3 = False '''
 
 
 def main():
@@ -198,11 +205,12 @@ def main():
     # Create stock table
     Stocks_Data = stock_api()
     stocks_table(Stocks_Data,cur,conn)
+    '''
     set_up_stocks(Stocks_Data, cur, conn, '2020-01-13', '2020-02-06')
     set_up_stocks(Stocks_Data, cur, conn,'2020-02-06', '2020-03-01')
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-01', '2020-10-25')
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')
-
+'''
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
     bitcoin_table(bitcoin_data, cur, conn)
