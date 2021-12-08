@@ -199,22 +199,22 @@ def itunes_api():
     
     
 #create iTunes table
-def itunes_table(data2,cur,conn):
+def itunes_table(data, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "iTunes Data"')
     cur.execute('CREATE TABLE "iTunes Data" ("Id" INTEGER PRIMARY KEY, "trackName" TEXT, "releaseDate" TEXT, "trackPrice" INTEGER, "primaryGenreName" TEXT, "contentAdvisoryRating" TEXT)')
 
 #compile iTunes data into database 
-    newdata2 = data2 
-    count2  = 1 
-    for i in newdata2['results']:
-        Id = count2 
+def set_up_itunes(data, cur, conn):
+    count  = 1 
+    for i in data['results']:
+        id = count
         trackName = i['trackName']
         releaseDate = i['releaseDate']
         trackPrice = i['trackPrice']
         primaryGenreName = i['primaryGenreName']
         contentAdvisoryRating = i['contentAdvisoryRating']
-        cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUES (?,?,?,?,?,?)',(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
-        count2 = count2 + 1 
+        cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUES (?,?,?,?,?,?)',(count,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
+        count = count + 1 
     conn.commit()
 
 
@@ -253,8 +253,9 @@ def main():
     #IMDB_table(IMDB_Data, cur, conn)
 
     #Create iTunes table 
-    iTunes_Data = itunes_api()
-    itunes_table(iTunes_Data,cur,conn)
+    itunes_data = itunes_api()
+    itunes_table(itunes_data,cur,conn)
+    set_up_itunes(itunes_data, cur, conn)
     
 
 if __name__ == "__main__":
