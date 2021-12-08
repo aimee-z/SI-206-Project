@@ -30,8 +30,7 @@ def covid_api():
 
 # Create COVID table
 def covid_table(data, cur, conn):
-    cur.execute('DROP TABLE IF EXISTS "COVID_Data"')
-    cur.execute('CREATE TABLE "COVID_Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
+    cur.execute('CREATE TABLE IF NOT EXISTS "COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
 
 # Compile COVID JSON data into database
 def set_up_covid(data, cur, conn, start, end):
@@ -39,7 +38,18 @@ def set_up_covid(data, cur, conn, start, end):
     newdata.sort(key = lambda x:x['date'])
 
     count = 1
-    flag = False
+    for i in newdata:
+        id = count
+        date = i['date']
+        total_cases = i['cases']['total']['value']
+        case_percent_population = i['cases']['total']['calculated']['population_percent']
+        change_in_population = i['cases']['total']['calculated']['change_from_prior_day']
+        hospitalized = i['outcomes']['hospitalized']['currently']['value']
+        deaths = i['outcomes']['death']['total']['value']
+        cur.execute('INSERT INTO "Covid_Data" (sequential_day, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
+        count = count + 1
+        
+    '''flag = False
 
     for i in newdata:
         date = i['date']
@@ -64,7 +74,7 @@ def set_up_covid(data, cur, conn, start, end):
             count = count + 1
 
         else:
-            break
+            break'''
         
     conn.commit()
     pass
@@ -126,7 +136,7 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
 
 
 
-# Get stock API data in JSON:
+'''# Get stock API data in JSON:
 def stock_api():
     api_access = '48e36d776c40e470ee12e76e5b9bd8cd'
     stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
@@ -185,7 +195,7 @@ def stocks_table(data3, cur, conn):
 
     #for i in range(1,len(selected_list)):
    #     cur.execute('DELETE Stocks_Data set Date = ? where date_id = ? ',((selected_list[i-1][0],i))) 
-   # conn.commit()
+   # conn.commit()'''
 
 
 
@@ -226,20 +236,17 @@ def main():
     # Create COVID table
     covid_data = covid_api()
     covid_table(covid_data, cur, conn)
-    set_up_covid(covid_data, cur, conn, '2020-01-13', '2020-02-06')
-    set_up_covid(covid_data, cur, conn, '2020-02-06', '2020-03-01')
-    set_up_covid(covid_data, cur, conn, '2020-10-01', '2020-10-25')
-    set_up_covid(covid_data, cur, conn, '2020-10-26', '2020-11-19')
+    set_up_covid(covid_data, cur, conn, '2020-02-14', '2020-05-24')
 
     # Create stock table
-    Stocks_Data = stock_api()
+    '''Stocks_Data = stock_api()
     stocks_table(Stocks_Data,cur,conn)
-    '''
+    
     set_up_stocks(Stocks_Data, cur, conn, '2020-01-13', '2020-02-06')
     set_up_stocks(Stocks_Data, cur, conn,'2020-02-06', '2020-03-01')
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-01', '2020-10-25')
-    set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')
-    '''
+    set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')'''
+    
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
     bitcoin_table(bitcoin_data, cur, conn)
