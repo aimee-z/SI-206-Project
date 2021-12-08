@@ -199,7 +199,7 @@ def itunes_api():
     
     
 #create iTunes table
-def itunes_table(data2,cur,conn):
+def itunes_table(data, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "iTunes Data"')
     cur.execute('CREATE TABLE "iTunes Data" ("Id" INTEGER PRIMARY KEY, "trackName" TEXT, "releaseDate" TEXT, "trackPrice" INTEGER, "primaryGenreName" TEXT, "contentAdvisoryRating" TEXT)')
 
