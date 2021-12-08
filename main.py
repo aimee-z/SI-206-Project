@@ -17,6 +17,7 @@ def setUpDatabase(db_name):
     conn = sqlite3.connect(path+'/'+db_name)
     cur = conn.cursor()
     return cur, conn
+ 
     
 
 
@@ -33,51 +34,26 @@ def covid_table(data, cur, conn):
     cur.execute('CREATE TABLE IF NOT EXISTS "COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
 
 # Compile COVID JSON data into database
-def set_up_covid(data, cur, conn, start, end):
+def set_up_covid(data, cur, conn, start):
     newdata = data['data']
     newdata.sort(key = lambda x:x['date'])
 
-    count = 1
-    for i in newdata:
-        id = count
-        date = i['date']
-        total_cases = i['cases']['total']['value']
-        case_percent_population = i['cases']['total']['calculated']['population_percent']
-        change_in_population = i['cases']['total']['calculated']['change_from_prior_day']
-        hospitalized = i['outcomes']['hospitalized']['currently']['value']
-        deaths = i['outcomes']['death']['total']['value']
-        cur.execute('INSERT INTO "Covid_Data" (sequential_day, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
-        count = count + 1
-        
-    '''flag = False
+    cur.execute('SELECT * FROM Covid_Data WHERE Covid_Data.sequential_day = ?', (start,))
+    ifday = cur.fetchall()
+    if len(ifday) == 0:
+        day_num = start
+        date = newdata[start]['date']
+        total_cases = newdata[start]['cases']['total']['value']
+        case_percent_population = newdata[start]['cases']['total']['calculated']['population_percent']
+        change_in_population = newdata[start]['cases']['total']['calculated']['change_from_prior_day']
+        hospitalized = newdata[start]['outcomes']['hospitalized']['currently']['value']
+        deaths = newdata[start]['outcomes']['death']['total']['value']
+        cur.execute('INSERT OR IGNORE INTO "Covid_Data" (sequential_day, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (day_num, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
 
-    for i in newdata:
-        date = i['date']
-
-        if date < start:
-            count = count + 1
-            flag = True
-            pass
-
-        elif date <= end:
-            if flag == True:
-                count = count + 1
-                flag = False
-            id = count
-            date = i['date']
-            total_cases = i['cases']['total']['value']
-            case_percent_population = i['cases']['total']['calculated']['population_percent']
-            change_in_population = i['cases']['total']['calculated']['change_from_prior_day']
-            hospitalized = i['outcomes']['hospitalized']['currently']['value']
-            deaths = i['outcomes']['death']['total']['value']
-            cur.execute('INSERT INTO "Covid_Data" (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths) VALUES (?,?,?,?,?,?,?)', (id, date, total_cases, case_percent_population, change_in_population, hospitalized, deaths))
-            count = count + 1
-
-        else:
-            break'''
-        
     conn.commit()
     pass
+
+
 
 
 # Get Bitcoin JSON data
@@ -94,9 +70,9 @@ def bitcoin_api():
     return data2
 
 # Create Bitcoin Table
-def bitcoin_table(data2, cur, conn):
-    cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
-    cur.execute('CREATE TABLE "Bitcoin Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
+'''def bitcoin_table(data2, cur, conn):
+    #cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
+    cur.execute('CREATE TABLE IF NOT EXISTS "Bitcoin Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
 
 # Compile Bitcoin JSON data into database
 def set_up_bitcoin(data2, cur, conn, start2, end2):
@@ -132,7 +108,7 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
             break
 
     conn.commit()
-    pass
+    pass'''
 
 
 '''# Get stock API data in JSON:
@@ -258,7 +234,21 @@ def main():
     # Create COVID table
     covid_data = covid_api()
     covid_table(covid_data, cur, conn)
-    set_up_covid(covid_data, cur, conn, '2020-02-14', '2020-05-24')
+    cur.execute('SELECT * FROM Covid_Data')
+    info = cur.fetchall()
+    if len(info) < 25:
+        for i in range(33, 58):
+            set_up_covid(covid_data, cur, conn, i)
+    elif 25 <= len(info) < 50:
+        for i in range(58, 83):
+            set_up_covid(covid_data, cur, conn, i)
+    elif 50 <= len(info) < 75:
+        for i in range(83, 108):
+            set_up_covid(covid_data, cur, conn, i)
+    else:
+        for i in range(108, 133):
+            set_up_covid(covid_data, cur, conn, i)
+        
 
     # Create stock table
     '''Stocks_Data = stock_api()
@@ -270,12 +260,12 @@ def main():
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')'''
     
     # Create Bitcoin Table
-    bitcoin_data = bitcoin_api()
+    '''bitcoin_data = bitcoin_api()
     bitcoin_table(bitcoin_data, cur, conn)
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-01-13', '2020-02-06')
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-02-06', '2020-03-01')
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-01', '2020-10-25')
-    set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-26', '2020-11-19')
+    set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-26', '2020-11-19')'''
 
     #Create IMDB Table 
     #IMDB_Data = IMDB_api()
