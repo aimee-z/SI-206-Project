@@ -125,31 +125,43 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
     pass
 
 
+
+
 # Get stock API data in JSON:
 def stock_api():
     api_access = '48e36d776c40e470ee12e76e5b9bd8cd'
     stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
     api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy')
-    #data3 = json.loads(api3_result)
     data3 = api3_result.json()
-    #print(data3)
     return data3
 
 def stocks_table(data3, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
-    cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
+    cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER, "Date" TEXT, "highest_price" REAL, "lowest_price" REAL,"trading_volume" REAL, "transaction_number" INTEGER)')
     
 # Create stocks table 
 def set_up_stocks(data3, cur,conn, start3, end3):
-    
-    newdata3 = data3 
-    #print(newdata3)
+    cur.execute("""INSERT INTO Stocks_Data (date_id, Date) SELECT id, date FROM Covid_Data""")
+
+    for i in data3['results']: 
+        #print(i)
+        highest_price = i['h']
+        print(highest_price)
+        lowest_price = i['l']
+        trading_volume = i['v']
+        transaction_number = i['t']
+        cur.execute("""UPDATE Stocks_Data SET (highest_price) = ?""", (highest_price,))
+        cur.execute("""UPDATE Stocks_Data SET (lowest_price) = ?""", (lowest_price,))
+        cur.execute("""UPDATE Stocks_Data SET (trading_volume) = ?""", (trading_volume,))
+        cur.execute("""UPDATE Stocks_Data SET (transaction_number) = ?""", (transaction_number,))
+       
+        '''
     count3 = 1 
     flag3 = False
 
     for i in newdata3:
         time_open = i['Date']
-        
+
         if time_open < start3:
             count3 = count3 + 1
             flag3 = True
@@ -158,40 +170,9 @@ def set_up_stocks(data3, cur,conn, start3, end3):
         elif time_open <= end3:
             if flag3 == True:
                 count3 = count3 + 1
-                flag3 = False
-
-
-    for i in newdata3['results']: 
-        #print(i)
-        id3 = count3
-        highest_price = i['h']
-        lowest_price = i['l']
-        trading_volume = i['v']
-        transaction_number = i['t']
-        cur.execute('INSERT INTO "Stocks_Data"(date_id,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(id3,highest_price,lowest_price,trading_volume,transaction_number))
-        count3 = count3 + 1 
-
-    cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
-    
-    date_list = cur.fetchall()
-    
-    for i in range(1,len(date_list)+1):
-        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((date_list[i-1][0],i))) 
-        #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i)))
-        #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
-    conn.commit()
-    
+                flag3 = False'''
 
     
-    
-# RANDOM CODE
-def readDataFromFile(filename):
-    full_path = os.path.join(os.path.dirname(__file__), filename)
-    f = open(full_path)
-    file_data = f.read()
-    f.close()
-    json_data = json.loads(file_data)
-    return json_data
 
 
 def main():
@@ -210,9 +191,9 @@ def main():
     Stocks_Data = stock_api()
     stocks_table(Stocks_Data,cur,conn)
     set_up_stocks(Stocks_Data, cur, conn, '2020-01-13', '2020-02-06')
-    set_up_stocks(Stocks_Data, cur, conn, '2020-02-06', '2020-03-01')
+    '''set_up_stocks(Stocks_Data, cur, conn, '2020-02-06', '2020-03-01')
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-01', '2020-10-25')
-    set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')
+    set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')'''
 
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
