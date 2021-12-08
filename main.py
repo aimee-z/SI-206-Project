@@ -188,15 +188,39 @@ def stocks_table(data3, cur, conn):
    # conn.commit()
 
 
-        
+# Create project database
+def setUpDatabase(db_name):
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+db_name)
+    cur = conn.cursor()
+    return cur, conn
 
-    ''' for i in newdata3:
-        
-        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((selected_list[i-1][0],i)))
+#get iTunes Data
+def itunes_api():
+    #request for 100 itunes movie 
+    api1_result = requests.get('https://itunes.apple.com/search?term=movie&limit=100&entity=movie')
+    data2 = api1_result.json 
+    return data2 
+
+#create iTunes table
+def itunes_table(data2,cur,conn):
+    cur.execute('DROP TABLE IF EXISTS "iTunes Data"')
+    cur.execute('CREATE TABLE "iTunes Data" ("Id" INTEGER PRIMARY KEY, "trackName" TEXT, "releaseDate" TEXT, "trackPrice" INTEGER, "primaryGenreName" TEXT, "contentAdvisoryRating" TEXT)')
+
+#compile iTunes data into database 
+    newdata2 = data2 
+    count2  = 1 
+    for i in newdata2:
+        Id = count2 
+        trackName = i['trackName']
+        releaseDate = i['releaseDate']
+        trackPrice = i['trackPrice']
+        primaryGenreName = i['primaryGenreName']
+        contentAdvisoryRating = i['contentAdvisoryRating']
+        cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUE (?,?,?,?,?,?)',(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
+        count2 = count2 + 1 
     conn.commit()
-    '''
 
-            
 
 
 def main():
@@ -228,6 +252,16 @@ def main():
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-01', '2020-10-25')
     set_up_bitcoin(bitcoin_data, cur, conn, '2020-10-26', '2020-11-19')
 
+    #Create IMDB Table 
+    #IMDB_Data = IMDB_api()
+    #IMDB_table(IMDB_Data, cur, conn)
+
+    #Create iTunes table 
+    iTunes_Data = itunes_api()
+    itunes_table(iTunes_Data,cur,conn)
+
 if __name__ == "__main__":
     main()
     unittest.main(verbosity = 2)
+
+

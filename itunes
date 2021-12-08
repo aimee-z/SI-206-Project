@@ -1,0 +1,50 @@
+import sqlite3
+import os
+import matplotlib.pyplot as plt 
+import numpy as np
+import unittest
+import json
+import requests
+import pandas as pd
+
+## Team Name: Women in Stem  
+## Team Members: Aimee Zheng, Sage Pei, Marina Sun
+
+#Scope: Relationship between IMDB top 100 ranked movies, iTunes data for that movie (esp cost to rent/buy),
+# and OMDB data (box office, awards - how do these line up with IMDB top 100 movie rankings)
+
+# Create project database
+def setUpDatabase(db_name):
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+db_name)
+    cur = conn.cursor()
+    return cur, conn
+
+#get iTunes Data
+def itunes_api():
+    #request for 100 itunes movie 
+    api1_result = requests.get('https://itunes.apple.com/search?term=movie&limit=100&entity=movie')
+    data2 = api1_result.json 
+    return data2 
+
+#create iTunes table
+def itunes_table(data2,cur,conn):
+    cur.execute('DROP TABLE IF EXISTS "iTunes Data"')
+    cur.execute('CREATE TABLE "iTunes Data" ("Id" INTEGER PRIMARY KEY, "trackName" TEXT, "releaseDate" TEXT, "trackPrice" INTEGER, "primaryGenreName" TEXT, "contentAdvisoryRating" TEXT)')
+
+#compile iTunes data into database 
+    newdata2 = data2 
+    count2  = 1 
+    for i in newdata2['results:']:
+        Id = count2 
+        trackName = i['trackName']
+        releaseDate = i['releaseDate']
+        trackPrice = i['trackPrice']
+        primaryGenreName = i['primaryGenreName']
+        contentAdvisoryRating = i['contentAdvisoryRating']
+        cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUE (?,?,?,?,?,?)',(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
+        count2 = count2 + 1 
+    conn.commit()
+
+
+
