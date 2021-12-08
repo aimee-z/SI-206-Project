@@ -130,17 +130,49 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
 # Get stock API data in JSON:
 def stock_api():
     api_access = '48e36d776c40e470ee12e76e5b9bd8cd'
-    stocks_url = 'https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&limit=120&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
-    api3_result = requests.get('https://api.polygon.io/v2/aggs/ticker/PFE/range/1/day/2020-01-13/2021-03-07?adjusted=true&sort=asc&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy')
+    stocks_url = 'https://api.polygon.io/v1/open-close/PFE/2020-01-13?adjusted=true&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy'
+    api3_result = requests.get('https://api.polygon.io/v1/open-close/PFE/2020-01-13?adjusted=true&apiKey=zU1RScZjXgXk3X91fSvGZ8j5gNCUS4xy')
     data3 = api3_result.json()
     return data3
 
 def stocks_table(data3, cur, conn):
     cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
-    cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER, "Date" TEXT, "highest_price" REAL, "lowest_price" REAL,"trading_volume" REAL, "transaction_number" INTEGER)')
-    
+    cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER, "Date" TEXT, "stocks_open" REAL, "stocks_high" REAL,"stocks_low" REAL, "stocks_close" INTEGER)')
+
 # Create stocks table 
 def set_up_stocks(data3, cur,conn, start3, end3):
+    newdata3 = data3
+    count3 = 1
+    flag3 = False
+
+    for i in newdata3:
+        Date = i['from'][0:10]
+            
+        if Date < start3:
+            count3 = count3 + 1
+            flag3 = True
+            pass
+
+        elif Date <= end3:
+            if flag3 == True:
+                count2 = count2 + 1
+                flag3 = False
+                    
+            id3 = count3
+            Date = i['from'][0:10]
+            #time_close = i['time_close']
+            stocks_open = i['open']
+            stocks_high = i['high']
+            stocks_low = i['low']
+            stocks_close = i['close']
+            cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER, "Date" TEXT, "stocks_open" REAL, "stocks_high" REAL,"stocks_low" REAL, "stocks_close" INTEGER)')
+            count3 = count3 + 1
+
+        else:
+            break
+
+    conn.commit()
+    '''
     cur.execute("""INSERT INTO Stocks_Data (date_id, Date) SELECT id, date FROM Covid_Data""")
 
     for i in data3['results']: 
@@ -154,8 +186,8 @@ def set_up_stocks(data3, cur,conn, start3, end3):
         cur.execute("""UPDATE Stocks_Data SET (lowest_price) = ?""", (lowest_price,))
         cur.execute("""UPDATE Stocks_Data SET (trading_volume) = ?""", (trading_volume,))
         cur.execute("""UPDATE Stocks_Data SET (transaction_number) = ?""", (transaction_number,))
-       
-        '''
+       '''
+    '''
     count3 = 1 
     flag3 = False
 
