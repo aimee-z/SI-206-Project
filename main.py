@@ -17,23 +17,22 @@ def setUpDatabase(db_name):
     conn = sqlite3.connect(path+'/'+db_name)
     cur = conn.cursor()
     return cur, conn
- 
-    
 
 
-# Get COVID-19 API data in JSON
+
+# Get National COVID-19 API data in JSON
 def covid_api():
-    # Request for historic US COVID data
     response_API = requests.get('https://api.covidtracking.com/v2/us/daily.json')
     data = response_API.text
     parse_json = json.loads(data)
     return parse_json
 
-# Create COVID table
+# Create National COVID table
 def covid_table(data, cur, conn):
+    # cur.execute('DROP TABLE IF EXISTS "COVID_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
 
-# Compile COVID JSON data into database
+# Compile National COVID JSON data into database
 def set_up_covid(data, cur, conn, start):
     newdata = data['data']
     newdata.sort(key = lambda x:x['date'])
@@ -53,7 +52,36 @@ def set_up_covid(data, cur, conn, start):
     conn.commit()
     pass
 
+# Get NY COVID-19 API data in JSON
+def ca_covid_api():
+    response_API = requests.get('https://api.covidtracking.com/v2/states/ny/daily/simple.json')
+    data = response_API.text
+    parse_json = json.loads(data)
+    return parse_json
 
+# Create NY COVID table
+def ca_covid_table(data, cur, conn):
+    #cur.execute('DROP TABLE IF EXISTS "NY_COVID_Data"')
+    cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
+
+# Compile NY COVID JSON data into database
+def set_up_ca_covid(data, cur, conn, start):
+    newdata = data['data']
+    newdata.sort(key = lambda x:x['date'])
+    
+    cur.execute('SELECT * FROM NY_Covid_Data WHERE NY_Covid_Data.sequential_day = ?', (start,))
+    ifday = cur.fetchall()
+    if len(ifday) == 0:
+        date = newdata[start]['date']
+        cur.execute('SELECT sequential_day FROM Covid_Data WHERE date = ?', (date,))
+        seq_day = cur.fetchone()[0]
+        total_cases = newdata[start]['cases']['total']
+        print(total_cases)
+        deaths = newdata[start]['outcomes']['death']['total']
+        cur.execute('INSERT OR IGNORE INTO "NY_Covid_Data" (sequential_day, date, total_cases, deaths) VALUES (?,?,?,?)', (seq_day, date, total_cases, deaths))
+
+    conn.commit()
+    pass
 
 
 # Get Bitcoin JSON data
@@ -215,18 +243,35 @@ def main():
     cur.execute('SELECT * FROM Covid_Data')
     info = cur.fetchall()
     if len(info) < 25:
-        for i in range(33, 58):
+        for i in range(49, 74):
             set_up_covid(covid_data, cur, conn, i)
     elif 25 <= len(info) < 50:
-        for i in range(58, 83):
+        for i in range(74, 99):
             set_up_covid(covid_data, cur, conn, i)
     elif 50 <= len(info) < 75:
-        for i in range(83, 108):
+        for i in range(99, 124):
             set_up_covid(covid_data, cur, conn, i)
     else:
-        for i in range(108, 133):
+        for i in range(124, 149):
             set_up_covid(covid_data, cur, conn, i)
-        
+
+    # Create Cali COVID table
+    ca_covid_data = ca_covid_api()
+    ca_covid_table(ca_covid_data, cur, conn)
+    cur.execute('SELECT * FROM NY_COVID_Data')
+    info = cur.fetchall()
+    if len(info) < 25:
+        for i in range(0, 25):
+            set_up_ca_covid(ca_covid_data, cur, conn, i)
+    elif 25 <= len(info) < 50:
+        for i in range(24, 50):
+            set_up_ca_covid(ca_covid_data, cur, conn, i)
+    elif 50 <= len(info) < 75:
+        for i in range(50, 75):
+            set_up_ca_covid(ca_covid_data, cur, conn, i)
+    else:
+        for i in range(74, 100):
+            set_up_ca_covid(ca_covid_data, cur, conn, i)
 
     # Create stock table
     '''Stocks_Data = stock_api()
