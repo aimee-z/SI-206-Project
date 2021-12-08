@@ -137,16 +137,18 @@ def stock_api():
     return data3
 
 # Create stocks table 
-def stocks_table(key, cur, conn):
-    stocks_dict = stock_api()
+def stocks_table(data3, cur, conn):
+    #stocks_dict = stock_api()
+    newdata3 = data3
+
     
     cur.execute('DROP TABLE IF EXISTS "Stocks_Data"')
     cur.execute('CREATE TABLE "Stocks_Data"("date_id" INTEGER PRIMARY KEY, "Date" TEXT, "highest_price" INTEGER, "lowest_price" INTEGER,"trading_volume" INTEGER, "transaction_number" INTEGER)')
     key = 1 
     
-    lastkey = cur.fetchone()[0]
+    
     while key < 26: 
-        for i in stocks_dict['results']:
+        for i in newdata3['results']:
             if key < 26:
                 highest_price = i['h']
                 lowest_price = i['l']
@@ -154,7 +156,14 @@ def stocks_table(key, cur, conn):
                 transaction_number = i['t']
                 #wrong parameter?? 
                 cur.execute('INSERT OR IGNORE INTO "Stocks_Data"(date_id,highest_price,lowest_price,trading_volume,transaction_number) VALUES(?,?,?,?,?)',(key,highest_price,lowest_price,trading_volume,transaction_number))
-        key = key + 1 
+                row_count = cur.rowcount 
+                if row_count > 0:
+                    key += 1 
+                    conn.commit()
+                else:
+                    break
+        continue
+ 
     #note: maybe try to delete data sets from within the time frame that matches id using a for loop & Select Delete Conditional after loading in data  ? 
 
     #adding in dates list to stocks_data 
@@ -210,7 +219,7 @@ def main():
     set_up_stocks(Stocks_Data, cur, conn,'2020-02-06', '2020-03-01')
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-01', '2020-10-25')
     set_up_stocks(Stocks_Data, cur, conn, '2020-10-26', '2020-11-19')
-'''
+    '''
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
     bitcoin_table(bitcoin_data, cur, conn)
