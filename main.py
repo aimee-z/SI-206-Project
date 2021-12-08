@@ -139,7 +139,6 @@ def set_up_bitcoin(data2, cur, conn, start2, end2):
     pass'''
 
 
-
 '''# Get stock API data in JSON:
 def stock_api():
     api_access = '48e36d776c40e470ee12e76e5b9bd8cd'
@@ -221,7 +220,7 @@ def itunes_table(data, cur, conn):
 def set_up_itunes(data, cur, conn):
     count  = 1 
     for i in data['results']:
-        id = count
+        Id = count
         trackName = i['trackName']
         releaseDate = i['releaseDate']
         trackPrice = i['trackPrice']
@@ -229,6 +228,29 @@ def set_up_itunes(data, cur, conn):
         contentAdvisoryRating = i['contentAdvisoryRating']
         cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUES (?,?,?,?,?,?)',(count,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
         count = count + 1 
+    conn.commit()
+
+#get Currency Data: 
+def currency_api():
+    api3_result = requests.get('https://api.frankfurter.app/2020-01-03..2021-03-07')
+    data3 = api3_result.json()
+    return data3 
+
+#create Currency table: 
+def currency_table(data3,cur,conn):
+    cur.execute('CREATE TABLE IF NOT EXISTS "Currency Data"("Id" INTEGER PRIMARY KEY, "date" TEXT, "USD" INTEGER)')
+
+#compile Currency data into database 
+def set_up_currency(data3, cur,conn): 
+    newdata3 = data3
+
+    count3 = 1 
+    for i in newdata3['rates']:
+        id = count3
+        date = i[0]
+        USD = i['USD']
+        cur.execute('INSERT INTO "Currency Data"(Id,USD,date) VALUES (?,?,?)',(count3,USD,date))
+        count3 = count3 +1 
     conn.commit()
 
 
@@ -298,6 +320,11 @@ def main():
     itunes_data = itunes_api()
     itunes_table(itunes_data,cur,conn)
     set_up_itunes(itunes_data, cur, conn)
+
+    #Create Currency table 
+    currency_data = currency_api()
+    currency_table(currency_data,cur,conn)
+    set_up_currency(currency_data,cur,conn)
     
 
 if __name__ == "__main__":
