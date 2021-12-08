@@ -143,6 +143,16 @@ def stocks_table(data3, cur, conn):
 
 # Create stocks table 
 def set_up_stocks(data3, cur,conn, start3, end3):
+
+    cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
+    date_list = cur.fetchall()
+    
+    for i in range(1,len(date_list)+1):
+        cur.execute('UPDATE Stocks_Data set Date = ? where date_id = ? ',((date_list[i-1][0],i))) 
+        #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i))) 
+        #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
+    conn.commit()
+
     cur.execute("""SELECT Covid_Data.date FROM Covid_Data JOIN Stocks_Data ON Stocks_Data.date_id = Covid_Data.id;""")
     date_list = cur.fetchall()
     
@@ -151,25 +161,6 @@ def set_up_stocks(data3, cur,conn, start3, end3):
         #cur.execute('INSERT INTO Stocks_Data(Date) VALUES(?)',((date_list[i-1][0],i)))
         #cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
     conn.commit()
-
-    newdata3 = data3 
-    #print(newdata3)
-    count3 = 1 
-    flag3 = False
-
-    for i in newdata3['results']:
-        time_open = i['']
-        
-        if time_open < start3:
-            count3 = count3 + 1
-            flag3 = True
-            pass
-
-        elif time_open <= end3:
-            if flag3 == True:
-                count3 = count3 + 1
-                flag3 = False
-
 
     for i in newdata3['results']: 
         #print(i)
