@@ -188,20 +188,16 @@ def stocks_table(data3, cur, conn):
    # conn.commit()
 
 
-# Create project database
-def setUpDatabase(db_name):
-    path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path+'/'+db_name)
-    cur = conn.cursor()
-    return cur, conn
+
 
 #get iTunes Data
 def itunes_api():
     #request for 100 itunes movie 
     api1_result = requests.get('https://itunes.apple.com/search?term=movie&limit=100&entity=movie')
-    data2 = api1_result.json 
+    data2 = api1_result.json()
     return data2 
-
+    
+    
 #create iTunes table
 def itunes_table(data2,cur,conn):
     cur.execute('DROP TABLE IF EXISTS "iTunes Data"')
@@ -210,14 +206,14 @@ def itunes_table(data2,cur,conn):
 #compile iTunes data into database 
     newdata2 = data2 
     count2  = 1 
-    for i in newdata2:
+    for i in newdata2['results']:
         Id = count2 
         trackName = i['trackName']
         releaseDate = i['releaseDate']
         trackPrice = i['trackPrice']
         primaryGenreName = i['primaryGenreName']
         contentAdvisoryRating = i['contentAdvisoryRating']
-        cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUE (?,?,?,?,?,?)',(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
+        cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUES (?,?,?,?,?,?)',(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
         count2 = count2 + 1 
     conn.commit()
 
@@ -259,6 +255,7 @@ def main():
     #Create iTunes table 
     iTunes_Data = itunes_api()
     itunes_table(iTunes_Data,cur,conn)
+    
 
 if __name__ == "__main__":
     main()
