@@ -13,6 +13,7 @@ import pandas as pd
 
 # Create project database
 def setUpDatabase(db_name):
+    ''' Takes in database name (string) as input. Returns database cursor and connection as outputs.'''
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path+'/'+db_name)
     cur = conn.cursor()
@@ -20,6 +21,8 @@ def setUpDatabase(db_name):
 
 # Get National COVID-19 API data in JSON
 def covid_api():
+    ''' Takes in no inputs. Uses requests module to get historical daily COVID-19 statistics from COVID-19 API. 
+    Returns COVID-19 data for date range in JSON formatting.'''
     response_API = requests.get('https://api.covidtracking.com/v2/us/daily.json')
     data = response_API.text
     parse_json = json.loads(data)
@@ -27,11 +30,16 @@ def covid_api():
 
 # Create National COVID table
 def covid_table(data, cur, conn):
+    '''Takes in COVID-19 JSON formatted data from covid_api(), database cursor and connector as inputs. 
+    Returns nothing. Creates a new table called COVID_Data.'''
     # cur.execute('DROP TABLE IF EXISTS "COVID_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
 
 # Compile National COVID JSON data into database
 def set_up_covid(data, cur, conn, start):
+    '''Takes in COVID-19 JSON formatted data from covid_api(), database cursor and connector as inputs. Returns nothing. 
+    Indexes date, total cases, percentage of the population with positive case, hospitalizations, and deaths from COVID-19 data
+    into COVID_Data table.'''
     newdata = data['data']
     newdata.sort(key = lambda x:x['date'])
 
@@ -52,6 +60,8 @@ def set_up_covid(data, cur, conn, start):
 
 # Get NY COVID-19 API data in JSON
 def ca_covid_api():
+    ''' Takes in no inputs. Uses requests module to get historical daily New York COVID-19 statistics from COVID-19 API. 
+    Returns COVID-19 data for date range in JSON formatting.'''
     response_API = requests.get('https://api.covidtracking.com/v2/states/ny/daily/simple.json')
     data = response_API.text
     parse_json = json.loads(data)
@@ -59,11 +69,15 @@ def ca_covid_api():
 
 # Create NY COVID table
 def ca_covid_table(data, cur, conn):
+    '''Takes in COVID-19 JSON formatted data from ca_covid_api(), database cursor and connector as inputs. 
+    Returns nothing. Creates a new table called NY_COVID_Data.'''
     #cur.execute('DROP TABLE IF EXISTS "NY_COVID_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
 
 # Compile NY COVID JSON data into database
 def set_up_ca_covid(data, cur, conn, start):
+    '''Takes in COVID-19 JSON formatted data from ca_covid_api(), database cursor and connector as inputs. Returns nothing. 
+    Indexes date, total cases from New York COVID-19 data into NY_COVID_Data table.'''
     newdata = data['data']
     newdata.sort(key = lambda x:x['date'])
     
@@ -83,6 +97,7 @@ def set_up_ca_covid(data, cur, conn, start):
 
 # Join NY COVID and National COVID Data 
 def join_tables(cur,conn):
+    '''Takes in database cursor and connector as inputs. Uses JOIN '''
     cur.execute("SELECT Covid_Data.sequential_day, Covid_Data.date, Covid_Data.total_cases FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day")
     results = cur.fetchall()
     conn.commit()
