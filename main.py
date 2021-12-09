@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import unittest
 import json
+from numpy.core.fromnumeric import size
 import requests
 import pandas as pd
 
@@ -106,7 +107,7 @@ def join_tables(cur,conn):
     cur.execute("SELECT NY_COVID_Data.total_cases, Covid_Data.date, Covid_Data.total_cases FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day")
     results = cur.fetchall()
     conn.commit()
-    print(results)
+    #print(results)
     return results
 
 # Calculate percentage of national COVID-19 cases that were identified in New York on a given day 
@@ -174,6 +175,28 @@ def set_up_bitcoin(data2, cur, conn, start):
     conn.commit()
     pass
 
+# Create Stacked Bar Chart (NY/NAT COVID-19 Cases)
+def create_stacked_bar(lst_of_tups, percent_lst):
+    x_axis_labels = []
+    ny_cases = []
+    not_ny_cases = []
+
+    for ny_case,date,nat_case in lst_of_tups:
+        x_axis_labels.append(date)
+        ny_cases.append(ny_case)
+        not_ny_cases.append(nat_case-ny_case)
+
+    plt.bar(x_axis_labels, ny_cases, color = 'r')
+    plt.xticks(fontsize=6)
+    plt.xticks(rotation=45)
+    plt.bar(x_axis_labels, not_ny_cases, bottom=ny_cases, color = 'b')
+    plt.xlabel('Date')
+    plt.ylabel('Number of COVID-19 Cases')
+    plt.title("Stacked Bar Chart of COVID-19 Cases in the U.S. by NY Cases and Non-NY Cases")
+    plt.legend(['NY COVID-19 Cases', 'Non-NY COVID-19 Cases'])
+
+    plt.show()
+
 def main():
     '''Takes no inputs and returns nothing. Calls the covid_api(), covid_table(), set_up_covid(), ny_covid_api(), ny_covid_table(), 
     set_up_ny_covid(), join_tables(), bitcoin_api(), bitcoin_table(), and set_up_bitcoin() functions.
@@ -239,8 +262,9 @@ def main():
     set_up_calculations = join_tables(cur, conn)
     calculations = calculate_ny_nat_cases(set_up_calculations)
     write_calculation_to_file("calculations.txt", set_up_calculations, calculations)
-    #filehandle = open("calculations.txt", "r")
-    #filehandle.close()
+    
+    # Create Stacked Bar Chart (NY/NAT COVID-19 Cases)
+    create_stacked_bar(set_up_calculations, calculations)
 
 if __name__ == "__main__":
     main()
