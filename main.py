@@ -81,27 +81,15 @@ def set_up_ca_covid(data, cur, conn, start):
         cur.execute('INSERT OR IGNORE INTO "NY_Covid_Data" (sequential_day, date, total_cases, deaths) VALUES (?,?,?,?)', (seq_day, date, total_cases, deaths))
 
     conn.commit()
-    # join NY Covid and National Covid 
-    def join_data(cur,conn,id):
-        cur.execute("""SELECT Covid_Data.sequential_day,Covid_Data.date, Covid_Data.total_cases, Covid_Data.case_percent_population, Covid_Data.change_in_population, Covid_Data.hospitalized, Covid_Data.deaths FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day;""")
-        new_list = cur.fetchall()
-    # cur.execute("INSERT INTO Covid_Data")
-    
-  
 
-    print(new_list)
-
-  
-
-
-
-
-
-
-
-#cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
+# Join NY COVID and National COVID Data 
+def join_tables(cur,conn):
+    cur.execute("SELECT Covid_Data.sequential_day, Covid_Data.date, Covid_Data.total_cases FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day")
+    results = cur.fetchall()
     conn.commit()
-    
+    print(results)
+    return results
+
 # Get Bitcoin JSON data
 def bitcoin_api():
     base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
@@ -210,7 +198,7 @@ def stocks_table(data3, cur, conn):
 
 
 #get iTunes Data
-def itunes_api():
+'''def itunes_api():
     #request for 100 itunes movie 
     api1_result = requests.get('https://itunes.apple.com/search?term=movie&limit=100&entity=movie')
     data2 = api1_result.json()
@@ -237,7 +225,7 @@ def set_up_itunes(data, cur, conn):
     conn.commit()
 '''
 #get Currency Data: 
-def currency_api():
+'''def currency_api():
     api3_result = requests.get('https://api.frankfurter.app/2020-01-03..2021-03-07')
     data3 = api3_result.json()
     return data3 
@@ -283,7 +271,7 @@ def main():
         for i in range(124, 149):
             set_up_covid(covid_data, cur, conn, i)
 
-    # Create Cali COVID table
+    # Create NY COVID table
     ca_covid_data = ca_covid_api()
     ca_covid_table(ca_covid_data, cur, conn)
     cur.execute('SELECT * FROM NY_COVID_Data')
@@ -328,14 +316,17 @@ def main():
         for i in range(124, 149):
             set_up_bitcoin(bitcoin_data, cur, conn, i)
 
+    # Join National and NY COVID Data
+    join_tables(cur, conn)
+
     #Create IMDB Table 
     #IMDB_Data = IMDB_api()
     #IMDB_table(IMDB_Data, cur, conn)
 
     #Create iTunes table 
-    itunes_data = itunes_api()
-    itunes_table(itunes_data,cur,conn)
-    set_up_itunes(itunes_data, cur, conn)
+    #itunes_data = itunes_api()
+    #itunes_table(itunes_data,cur,conn)
+    #set_up_itunes(itunes_data, cur, conn)
 
     #Create Currency table 
     #currency_data = currency_api()
