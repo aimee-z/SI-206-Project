@@ -62,7 +62,7 @@ def ca_covid_api():
 # Create NY COVID table
 def ca_covid_table(data, cur, conn):
     #cur.execute('DROP TABLE IF EXISTS "NY_COVID_Data"')
-    cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "null"INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
+    cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
 
 # Compile NY COVID JSON data into database
 def set_up_ca_covid(data, cur, conn, start):
@@ -72,12 +72,13 @@ def set_up_ca_covid(data, cur, conn, start):
     cur.execute('SELECT * FROM NY_Covid_Data WHERE NY_Covid_Data.sequential_day = ?', (start,))
     ifday = cur.fetchall()
     if len(ifday) == 0:
-        date = newdata[start]['date']
-        cur.execute('SELECT sequential_day FROM Covid_Data WHERE date = ?', (date,))
-        seq_day = cur.fetchone()[0]
-        total_cases = newdata[start]['cases']['total']
-        print(total_cases)
-        deaths = newdata[start]['outcomes']['death']['total']
+        new = start-49
+        date = newdata[new]['date']
+        #cur.execute('SELECT sequential_day FROM Covid_Data WHERE date = ?', (date,))
+        #seq_day = cur.fetchone()[0]
+        seq_day = start
+        total_cases = newdata[new]['cases']['total']
+        deaths = newdata[new]['outcomes']['death']['total']
         cur.execute('INSERT OR IGNORE INTO "NY_Covid_Data" (sequential_day, date, total_cases, deaths) VALUES (?,?,?,?)', (seq_day, date, total_cases, deaths))
 
     conn.commit()
@@ -99,13 +100,11 @@ def bitcoin_api():
     param['limit'] = 1
     api2_result = requests.get(base_url, params=param)
     data2 = api2_result.json()
-    #data2_text = data2.text
-    #parse_json2 = json.loads(data2_text)
     return data2
 
 # Create Bitcoin Table
 def bitcoin_table(data2, cur, conn):
-    #cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
+    cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "Bitcoin Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
 
 # Compile Bitcoin JSON data into database
@@ -277,16 +276,16 @@ def main():
     cur.execute('SELECT * FROM NY_COVID_Data')
     info = cur.fetchall()
     if len(info) < 25:
-        for i in range(0, 25):
+        for i in range(49, 74):
             set_up_ca_covid(ca_covid_data, cur, conn, i)
     elif 25 <= len(info) < 50:
-        for i in range(24, 50):
+        for i in range(74, 99):
             set_up_ca_covid(ca_covid_data, cur, conn, i)
     elif 50 <= len(info) < 75:
-        for i in range(50, 75):
+        for i in range(99, 124):
             set_up_ca_covid(ca_covid_data, cur, conn, i)
     else:
-        for i in range(74, 100):
+        for i in range(124, 149):
             set_up_ca_covid(ca_covid_data, cur, conn, i)
 
     # Create stock table
@@ -317,7 +316,7 @@ def main():
             set_up_bitcoin(bitcoin_data, cur, conn, i)
 
     # Join National and NY COVID Data
-    join_tables(cur, conn)
+    calculations = join_tables(cur, conn)
 
     #Create IMDB Table 
     #IMDB_Data = IMDB_api()
