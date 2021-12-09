@@ -107,7 +107,6 @@ def join_tables(cur,conn):
     cur.execute("SELECT NY_COVID_Data.total_cases, Covid_Data.date, Covid_Data.total_cases FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day")
     results = cur.fetchall()
     conn.commit()
-    print(results)
     return results
 
 # Calculate percentage of national COVID-19 cases that were identified in New York on a given day 
@@ -117,8 +116,19 @@ def calculate_ny_nat_cases(lst_of_tups):
     for ny_cases, date, nat_cases in lst_of_tups:
         percent_ny = (ny_cases/nat_cases)*100
         percent_lst.append(percent_ny)
-    print(percent_lst)
     return percent_lst
+
+# Write difference of national to NY cases in a file
+def write_diff_to_file(filename, lst_of_tups):
+    '''Takes in filename (string) and a list of tuples from join_tables().
+    Returns text file ('difference.txt') that writes the difference value of NY/National COVID-19 cases for specified 100 days.'''
+    with open(filename, "w", newline="") as fileout:
+        fileout.write("Difference of NY COVID-19 cases compared to national cases on a given day:\n")
+        fileout.write("======================================================================================\n\n")
+        for i in range(len(lst_of_tups)):
+            fileout.write("On {} the difference of NY COVID-19 cases compared to national cases was {} cases.\n".format(lst_of_tups[i][1], (lst_of_tups[i][2]-lst_of_tups[i][0])))
+        fileout.close()
+    pass
 
 # Write calculation data to file
 def write_calculation_to_file(filename, lst_of_tups, percent_lst):
@@ -176,10 +186,12 @@ def set_up_bitcoin(data2, cur, conn, start):
     conn.commit()
     pass
 
+
+
 # Create Bar Chart Percentage of NY/NAT Cases
 def create_percent_bar(lst_of_tups, percent_lst):
     x_axis_labels = []
-    for ny_case, date, nat_cae in lst_of_tups:
+    for ny_case, date, nat_case in lst_of_tups:
         x_axis_labels.append(date)
     
     plt.bar(x_axis_labels, percent_lst, color = 'r')
@@ -191,9 +203,8 @@ def create_percent_bar(lst_of_tups, percent_lst):
 
     plt.show()
 
-
 # Create Stacked Bar Chart (NY/NAT COVID-19 Cases)
-def create_stacked_bar(lst_of_tups):
+def create_stacked_bar(lst_of_tups, percent_lst):
     x_axis_labels = []
     ny_cases = []
     not_ny_cases = []
@@ -279,8 +290,9 @@ def main():
     set_up_calculations = join_tables(cur, conn)
     calculations = calculate_ny_nat_cases(set_up_calculations)
     write_calculation_to_file("calculations.txt", set_up_calculations, calculations)
+    write_diff_to_file("difference.txt", set_up_calculations)
 
-    # Create Bar Chart of Percentage
+    # Create Bar Chart (Percentage of Nat. COVID-19 Cases in NY)
     create_percent_bar(set_up_calculations, calculations)
     
     # Create Stacked Bar Chart (NY/NAT COVID-19 Cases)
