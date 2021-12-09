@@ -103,7 +103,7 @@ def set_up_ny_covid(data, cur, conn, start):
 def join_tables(cur,conn):
     '''Takes in database cursor and connector as inputs. Uses JOIN to return a list of tuples in the format 
     (NY cases, date, National cases) where date is the same.'''
-    cur.execute("SELECT Covid_Data.sequential_day, Covid_Data.date, Covid_Data.total_cases FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day")
+    cur.execute("SELECT NY_COVID_Data.total_cases, Covid_Data.date, Covid_Data.total_cases FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day")
     results = cur.fetchall()
     conn.commit()
     print(results)
