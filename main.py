@@ -109,6 +109,27 @@ def join_tables(cur,conn):
     print(results)
     return results
 
+# Calculate percentage of national COVID-19 cases that were identified in New York on a given day 
+def calculate_ny_nat_cases(lst_of_tups):
+    '''Takes in list of tuples from join_tables() and calculates the percentage of national COVID-19 cases that were identified in New York on a given day.'''
+    percent_lst = []
+    for ny_cases,date,nat_cases in lst_of_tups:
+        percent_ny = (ny_cases/nat_cases)*100
+        percent_lst.append(percent_ny)
+    return percent_lst
+
+# Write calculation data to file
+def write_calculation_to_file(filename, lst_of_tups, percent_lst):
+    '''Takes in filename (string), list of tuples from join_tables(), and list of calculated percentages from calculate_ny_nat_cases().
+    Returns text file ('calculations.txt') that writes the percentage value of NY/National COVID-19 cases for specified 100 days.'''
+    with open(filename, "w", newline="") as fileout:
+        fileout.write("Percentage of national COVID-19 cases that were identified in New York on a given day:\n")
+        fileout.write("======================================================================================\n\n")
+        for i in range(len(percent_lst)):
+            fileout.write("On {} the percent of national COVID-19 cases in New York was {}%.\n".format(lst_of_tups[i][1], round(percent_lst[i],2)))
+        fileout.close()
+    pass
+
 # Get Bitcoin JSON data
 def bitcoin_api():
     '''Takes in no inputs. Uses requests module to get historical daily Bitcoin data from CoinPaprika API. 
@@ -214,8 +235,12 @@ def main():
         for i in range(124, 149):
             set_up_bitcoin(bitcoin_data, cur, conn, i)
 
-    # Join National and NY COVID Data
-    calculations = join_tables(cur, conn)
+    # Join National and NY COVID Data, make calculations, and write to file
+    set_up_calculations = join_tables(cur, conn)
+    calculations = calculate_ny_nat_cases(set_up_calculations)
+    write_calculation_to_file("calculations.txt", set_up_calculations, calculations)
+    #filehandle = open("calculations.txt", "r")
+    #filehandle.close()
 
 if __name__ == "__main__":
     main()
