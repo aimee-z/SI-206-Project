@@ -161,10 +161,11 @@ def set_up_bitcoin(data2, cur, conn, start):
     cur.execute('SELECT * FROM Bitcoin_Data WHERE Bitcoin_Data.sequential_day = ?', (start,))
 
     ifday = cur.fetchall()    
-    if len(ifday) == 0:           
+    if len(ifday) == 0: 
+        new = start-49          
         time_open = newdata2[start]['time_open'][0:10]
-        cur.execute('SELECT sequential_day FROM Covid_Data WHERE date = ?', (time_open,))
-        seq_day = cur.fetchone()[0]
+        cur.execute('SELECT sequential_day FROM Bitcoin_Data WHERE date = ?', (time_open,))
+        seq_day = start
         bitcoin_open = newdata2[start]['open']
         bitcoin_high = newdata2[start]['high']
         print(bitcoin_high)
