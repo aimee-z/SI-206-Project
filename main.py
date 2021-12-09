@@ -37,9 +37,11 @@ def covid_table(data, cur, conn):
 
 # Compile National COVID JSON data into database
 def set_up_covid(data, cur, conn, start):
-    '''Takes in COVID-19 JSON formatted data from covid_api(), database cursor and connector as inputs. Returns nothing. 
+    '''Takes in COVID-19 JSON formatted data from covid_api(), database cursor and connector, and start value (integer) as inputs. Returns nothing. 
     Indexes date, total cases, percentage of the population with positive case, hospitalizations, and deaths from COVID-19 data
-    into COVID_Data table.'''
+    into COVID_Data table.
+    
+    Uses start value to limit amount of data to 25 collected/stored at a time '''
     newdata = data['data']
     newdata.sort(key = lambda x:x['date'])
 
@@ -59,7 +61,7 @@ def set_up_covid(data, cur, conn, start):
     pass
 
 # Get NY COVID-19 API data in JSON
-def ca_covid_api():
+def ny_covid_api():
     ''' Takes in no inputs. Uses requests module to get historical daily New York COVID-19 statistics from COVID-19 API. 
     Returns COVID-19 data for date range in JSON formatting.'''
     response_API = requests.get('https://api.covidtracking.com/v2/states/ny/daily/simple.json')
@@ -68,16 +70,18 @@ def ca_covid_api():
     return parse_json
 
 # Create NY COVID table
-def ca_covid_table(data, cur, conn):
-    '''Takes in COVID-19 JSON formatted data from ca_covid_api(), database cursor and connector as inputs. 
+def ny_covid_table(data, cur, conn):
+    '''Takes in COVID-19 JSON formatted data from ny_covid_api(), database cursor and connector as inputs. 
     Returns nothing. Creates a new table called NY_COVID_Data.'''
     #cur.execute('DROP TABLE IF EXISTS "NY_COVID_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
 
 # Compile NY COVID JSON data into database
-def set_up_ca_covid(data, cur, conn, start):
-    '''Takes in COVID-19 JSON formatted data from ca_covid_api(), database cursor and connector as inputs. Returns nothing. 
-    Indexes date, total cases from New York COVID-19 data into NY_COVID_Data table.'''
+def set_up_ny_covid(data, cur, conn, start):
+    '''Takes in COVID-19 JSON formatted data from ny_covid_api(), database cursor and connector, and start value (integer) as inputs. Returns nothing. 
+    Indexes date, total cases from New York COVID-19 data into NY_COVID_Data table.
+    
+    Uses start value to limit amount of data to 25 collected/stored at a time '''
     newdata = data['data']
     newdata.sort(key = lambda x:x['date'])
     
@@ -107,6 +111,8 @@ def join_tables(cur,conn):
 
 # Get Bitcoin JSON data
 def bitcoin_api():
+    '''Takes in no inputs. Uses requests module to get historical daily Bitcoin data from CoinPaprika API. 
+    Returns Bitcoin data for date range in JSON formatting.'''
     base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
     param = {}
     param['start'] = '2020-01-13'
@@ -118,12 +124,17 @@ def bitcoin_api():
 
 # Create Bitcoin Table
 def bitcoin_table(data2, cur, conn):
+    '''Takes in Bitcoin JSON formatted data from bitcoin_api(), database cursor and connector as inputs. 
+    Returns nothing. Creates a new table called Bitcoin_Data.'''
     #cur.execute('DROP TABLE IF EXISTS "Bitcoin_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "Bitcoin_Data"("sequential_day" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
 
 # Compile Bitcoin JSON data into database
 def set_up_bitcoin(data2, cur, conn, start):
-
+    '''Takes in Bitcoin JSON formatted data from bitcoin_api(), database cursor and connector, and a start value (integer) as inputs. Returns nothing. 
+    Indexes date, open, high, low, and closing values from Bitcoin data into Bitcoin_Data table. 
+    
+    Uses start value to limit amount of data to 25 collected/stored at a time '''
     newdata2 = data2
     cur.execute('SELECT * FROM Bitcoin_Data WHERE Bitcoin_Data.sequential_day = ?', (start,))
 
@@ -143,7 +154,10 @@ def set_up_bitcoin(data2, cur, conn, start):
     pass
 
 def main():
-
+    '''Takes no inputs and returns nothing. Calls the covid_api(), covid_table(), set_up_covid(), ny_covid_api(), ny_covid_table(), 
+    set_up_ny_covid(), join_tables(), bitcoin_api(), bitcoin_table(), and set_up_bitcoin() functions.
+    
+    Limits the amount of data to 25 collected/stored at a time.'''
     cur, conn = setUpDatabase('project.db')
 
     # Create COVID table
@@ -165,22 +179,22 @@ def main():
             set_up_covid(covid_data, cur, conn, i)
 
     # Create NY COVID table
-    ca_covid_data = ca_covid_api()
-    ca_covid_table(ca_covid_data, cur, conn)
+    ny_covid_data = ny_covid_api()
+    ny_covid_table(ny_covid_data, cur, conn)
     cur.execute('SELECT * FROM NY_COVID_Data')
     info = cur.fetchall()
     if len(info) < 25:
         for i in range(49, 74):
-            set_up_ca_covid(ca_covid_data, cur, conn, i)
+            set_up_ny_covid(ny_covid_data, cur, conn, i)
     elif 25 <= len(info) < 50:
         for i in range(74, 99):
-            set_up_ca_covid(ca_covid_data, cur, conn, i)
+            set_up_ny_covid(ny_covid_data, cur, conn, i)
     elif 50 <= len(info) < 75:
         for i in range(99, 124):
-            set_up_ca_covid(ca_covid_data, cur, conn, i)
+            set_up_ny_covid(ny_covid_data, cur, conn, i)
     else:
         for i in range(124, 149):
-            set_up_ca_covid(ca_covid_data, cur, conn, i)
+            set_up_ny_covid(ny_covid_data, cur, conn, i)
     
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
