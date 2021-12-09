@@ -62,7 +62,7 @@ def ca_covid_api():
 # Create NY COVID table
 def ca_covid_table(data, cur, conn):
     #cur.execute('DROP TABLE IF EXISTS "NY_COVID_Data"')
-    cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
+    cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "null"INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
 
 # Compile NY COVID JSON data into database
 def set_up_ca_covid(data, cur, conn, start):
@@ -81,9 +81,27 @@ def set_up_ca_covid(data, cur, conn, start):
         cur.execute('INSERT OR IGNORE INTO "NY_Covid_Data" (sequential_day, date, total_cases, deaths) VALUES (?,?,?,?)', (seq_day, date, total_cases, deaths))
 
     conn.commit()
-    pass
+    # join NY Covid and National Covid 
+    def join_data(cur,conn,id):
+        cur.execute("""SELECT Covid_Data.sequential_day,Covid_Data.date, Covid_Data.total_cases, Covid_Data.case_percent_population, Covid_Data.change_in_population, Covid_Data.hospitalized, Covid_Data.deaths FROM Covid_Data LEFT JOIN NY_COVID_Data ON NY_COVID_Data.sequential_day = Covid_Data.sequential_day;""")
+        new_list = cur.fetchall()
+    # cur.execute("INSERT INTO Covid_Data")
+    
+  
+
+    print(new_list)
+
+  
 
 
+
+
+
+
+
+#cur.execute('INSERT INTO Stocks_Data.Date VALUES (?) WHERE date_id (?)', (date_list[i-1][0],i,))
+    conn.commit()
+    
 # Get Bitcoin JSON data
 def bitcoin_api():
     base_url = 'https://api.coinpaprika.com/v1/coins/btc-bitcoin/ohlcv/historical?'
@@ -217,7 +235,7 @@ def set_up_itunes(data, cur, conn):
         cur.execute('INSERT INTO "iTunes Data"(Id,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating) VALUES (?,?,?,?,?,?)',(count,trackName,releaseDate,trackPrice,primaryGenreName,contentAdvisoryRating))
         count = count + 1 
     conn.commit()
-
+'''
 #get Currency Data: 
 def currency_api():
     api3_result = requests.get('https://api.frankfurter.app/2020-01-03..2021-03-07')
@@ -240,7 +258,7 @@ def set_up_currency(data3, cur,conn):
         cur.execute('INSERT INTO "Currency Data"(Id,USD,date) VALUES (?,?,?)',(count3,USD,date))
         count3 = count3 +1 
     conn.commit()
-
+'''
 
 
 def main():
@@ -320,9 +338,9 @@ def main():
     set_up_itunes(itunes_data, cur, conn)
 
     #Create Currency table 
-    currency_data = currency_api()
-    currency_table(currency_data,cur,conn)
-    set_up_currency(currency_data,cur,conn)
+    #currency_data = currency_api()
+    #currency_table(currency_data,cur,conn)
+   # set_up_currency(currency_data,cur,conn)
     
 
 if __name__ == "__main__":
