@@ -99,29 +99,27 @@ def bitcoin_api():
 
 # Create Bitcoin Table
 def bitcoin_table(data2, cur, conn):
-    #cur.execute('DROP TABLE IF EXISTS "Bitcoin Data"')
-    cur.execute('CREATE TABLE IF NOT EXISTS "Bitcoin Data"("id" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
+    #cur.execute('DROP TABLE IF EXISTS "Bitcoin_Data"')
+    cur.execute('CREATE TABLE IF NOT EXISTS "Bitcoin_Data"("sequential_day" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
 
 # Compile Bitcoin JSON data into database
 def set_up_bitcoin(data2, cur, conn, start):
 
     newdata2 = data2
 
-    cur.execute('SELECT * FROM "Bitcoin Data" WHERE "Bitcoin Data".id = ?', (start,))
+    cur.execute('SELECT * FROM Bitcoin_Data WHERE Bitcoin_Data.sequential_day = ?', (start,))
 
-    count2 = 1
     ifday = cur.fetchall()    
-    if len(ifday) == 0:
-        for i in newdata2:            
-            id2 = count2
-            time_open = i['time_open'][0:10]
-            #time_close = i['time_close']
-            bitcoin_open = i['open']
-            bitcoin_high = i['high']
-            bitcoin_low = i['low']
-            bitcoin_close = i['close']
-            cur.execute('INSERT OR IGNORE INTO "Bitcoin Data"(id, date, open, high, low, close) VALUES(?,?,?,?,?,?)', (id2, time_open, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
-            count2 = count2 + 1
+    if len(ifday) == 0:           
+        time_open = newdata2[start]['time_open'][0:10]
+        cur.execute('SELECT sequential_day FROM Covid_Data WHERE date = ?', (time_open,))
+        seq_day = cur.fetchone()[0]
+        bitcoin_open = newdata2[start]['open']
+        bitcoin_high = newdata2[start]['high']
+        print(bitcoin_high)
+        bitcoin_low = newdata2[start]['low']
+        bitcoin_close = newdata2[start]['close']
+        cur.execute('INSERT OR IGNORE INTO "Bitcoin_Data" (sequential_day, date, open, high, low, close) VALUES(?,?,?,?,?,?)', (seq_day, time_open, bitcoin_open, bitcoin_high, bitcoin_low, bitcoin_close))
 
     conn.commit()
     pass
@@ -192,7 +190,7 @@ def stocks_table(data3, cur, conn):
 
 
 #get iTunes Data
-def itunes_api():
+'''def itunes_api():
     #request for 100 itunes movie 
     api1_result = requests.get('https://itunes.apple.com/search?term=movie&limit=100&entity=movie')
     data2 = api1_result.json()
@@ -239,7 +237,7 @@ def set_up_currency(data3, cur,conn):
         USD = i['USD']
         cur.execute('INSERT INTO "Currency Data"(Id,USD,date) VALUES (?,?,?)',(count3,USD,date))
         count3 = count3 +1 
-    conn.commit()
+    conn.commit()'''
 
 
 
@@ -295,7 +293,7 @@ def main():
     # Create Bitcoin Table
     bitcoin_data = bitcoin_api()
     bitcoin_table(bitcoin_data, cur, conn)
-    cur.execute('SELECT * FROM "Bitcoin Data"')
+    cur.execute('SELECT * FROM Bitcoin_Data')
     info = cur.fetchall()
     if len(info) < 25:
         for i in range(49, 74):
@@ -315,14 +313,14 @@ def main():
     #IMDB_table(IMDB_Data, cur, conn)
 
     #Create iTunes table 
-    itunes_data = itunes_api()
+    '''itunes_data = itunes_api()
     itunes_table(itunes_data,cur,conn)
     set_up_itunes(itunes_data, cur, conn)
 
     #Create Currency table 
     currency_data = currency_api()
     currency_table(currency_data,cur,conn)
-    set_up_currency(currency_data,cur,conn)
+    set_up_currency(currency_data,cur,conn)'''
     
 
 if __name__ == "__main__":
