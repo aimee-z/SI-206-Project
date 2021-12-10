@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import matplotlib.pyplot as plt 
+import matplotlib.ticker as plticker
 import numpy as np
 import unittest
 import json
@@ -33,7 +34,6 @@ def covid_api():
 def covid_table(data, cur, conn):
     '''Takes in COVID-19 JSON formatted data from covid_api(), database cursor and connector as inputs. 
     Returns nothing. Creates a new table called COVID_Data.'''
-    # cur.execute('DROP TABLE IF EXISTS "COVID_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "case_percent_population" REAL, "change_in_population" INTEGER, "hospitalized" INTEGER, "deaths" INTEGER)')
 
 # Compile National COVID JSON data into database
@@ -74,7 +74,6 @@ def ny_covid_api():
 def ny_covid_table(data, cur, conn):
     '''Takes in COVID-19 JSON formatted data from ny_covid_api(), database cursor and connector as inputs. 
     Returns nothing. Creates a new table called NY_COVID_Data.'''
-    #cur.execute('DROP TABLE IF EXISTS "NY_COVID_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "NY_COVID_Data"("sequential_day" INTEGER, "date" TEXT, "total_cases" INTEGER, "deaths" INTEGER)')
 
 # Compile NY COVID JSON data into database
@@ -111,7 +110,7 @@ def join_tables(cur,conn):
 
 # Calculate percentage of national COVID-19 cases that were identified in New York on a given day 
 def calculate_ny_nat_cases(lst_of_tups):
-    '''Takes in list of tuples from join_tables() and calculates the percentage of national COVID-19 cases that were identified in New York on a given day.'''
+    '''Takes in list of tuples from join_tables() and calculates the percentage of national COVID-19 cases that were identified in New York on a given day, and returns it.'''
     percent_lst = []
     for ny_cases, date, nat_cases in lst_of_tups:
         percent_ny = (ny_cases/nat_cases)*100
@@ -159,7 +158,6 @@ def bitcoin_api():
 def bitcoin_table(data2, cur, conn):
     '''Takes in Bitcoin JSON formatted data from bitcoin_api(), database cursor and connector as inputs. 
     Returns nothing. Creates a new table called Bitcoin_Data.'''
-    #cur.execute('DROP TABLE IF EXISTS "Bitcoin_Data"')
     cur.execute('CREATE TABLE IF NOT EXISTS "Bitcoin_Data"("sequential_day" INTEGER PRIMARY KEY, "date" TEXT, "open" INTEGER, "high" INTEGER, "low" INTEGER, "close" INTEGER)')
 
 # Compile Bitcoin JSON data into database
@@ -186,6 +184,29 @@ def set_up_bitcoin(data2, cur, conn, start):
     conn.commit()
     pass
 
+def bitcoin_graph(lst_of_tups, cur, conn):
+    x_axis_labels = []
+    y_axis_labels = []
+
+    cur.execute('SELECT open FROM Bitcoin_Data')
+    y_axis = cur.fetchall()
+    conn.commit()
+    
+    for ny_case, date, nat_case in lst_of_tups:
+        x_axis_labels.append(nat_case)
+    for i in y_axis:
+        y_axis_labels.append(i[0])
+    
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    plt.scatter(x_axis_labels, y_axis_labels, linestyle='-', marker='*')
+    loc = plticker.MultipleLocator(500000)
+    ax.xaxis.set_major_locator(loc)
+    plt.xlabel('Number of National COVID-19 Cases (millions)')
+    plt.ylabel('Price of Bitcoin ($)')
+    plt.title("Price of Bitcoin compared to Total National COVID-19 Cases")
+    plt.show()
+
 
 
 # Create Bar Chart Percentage of NY/NAT Cases
@@ -194,7 +215,7 @@ def create_percent_bar(lst_of_tups, percent_lst):
     for ny_case, date, nat_case in lst_of_tups:
         x_axis_labels.append(date)
     
-    plt.bar(x_axis_labels, percent_lst, color = 'r')
+    plt.bar(x_axis_labels, percent_lst, color = (0.2, 0.4, 0.6, 0.6))
     plt.xticks(fontsize=6)
     plt.xticks(rotation=45)
     plt.xlabel('Date')
@@ -297,6 +318,9 @@ def main():
     
     # Create Stacked Bar Chart (NY/NAT COVID-19 Cases)
     create_stacked_bar(set_up_calculations, calculations)
+
+    # Create Bitcoin file and visualization
+    bitcoin_graph(set_up_calculations, cur, conn)
 
 if __name__ == "__main__":
     main()
