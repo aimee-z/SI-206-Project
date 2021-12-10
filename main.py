@@ -208,7 +208,6 @@ def bitcoin_graph(lst_of_tups, cur, conn):
     plt.show()
 
 
-
 # Create Bar Chart Percentage of NY/NAT Cases
 def create_percent_bar(lst_of_tups, percent_lst):
     x_axis_labels = []
