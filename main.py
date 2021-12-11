@@ -185,6 +185,9 @@ def set_up_bitcoin(data2, cur, conn, start):
     pass
 
 def bitcoin_graph(lst_of_tups, cur, conn):
+    '''Takes in a list of tuples containing the number of NY COVID-19 cases, date, and National COVID cases,
+    and the database cursor and connector as inputs. Uses matplotlib to return scatterplot of Bitcoin price ($)
+    to National COVID cases (millions) across specified date range.'''
     x_axis_labels = []
     y_axis_labels = []
 
@@ -210,6 +213,9 @@ def bitcoin_graph(lst_of_tups, cur, conn):
 
 # Create Bar Chart Percentage of NY/NAT Cases
 def create_percent_bar(lst_of_tups, percent_lst):
+    ''' Takes in a list of tuples containing the number of NY COVID-19 cases, date, and National COVID cases,
+    a list of the % of NY COVID cases that made up National COVID cases and the database cursor and connector as inputs.
+    Returns a bar chart comparing % of NY COVID cases to National COVID cases.'''
     x_axis_labels = []
     for ny_case, date, nat_case in lst_of_tups:
         x_axis_labels.append(date)
@@ -224,23 +230,26 @@ def create_percent_bar(lst_of_tups, percent_lst):
     plt.show()
 
 # Create Stacked Bar Chart (NY/NAT COVID-19 Cases)
-def create_stacked_bar(lst_of_tups, percent_lst):
+def create_stacked_bar(lst_of_tups):
+    '''Takes in a list of tuples containing the number of NY COVID-19 cases, date, and National COVID cases,
+    and the database cursor and connector as inputs. Returns a stacked bar chart comparing raw number of NY COVID 
+    cases (thousands) to Non-NY COVID cases.'''
     x_axis_labels = []
     ny_cases = []
     not_ny_cases = []
 
     for ny_case,date,nat_case in lst_of_tups:
         x_axis_labels.append(date)
-        ny_cases.append(ny_case)
-        not_ny_cases.append(nat_case-ny_case)
+        ny_cases.append(ny_case/1000)
+        not_ny_cases.append(nat_case/1000-ny_case/1000)
 
     plt.bar(x_axis_labels, ny_cases, color = 'r')
     plt.xticks(fontsize=6)
     plt.xticks(rotation=45)
     plt.bar(x_axis_labels, not_ny_cases, bottom=ny_cases, color = 'b')
     plt.xlabel('Date')
-    plt.ylabel('Number of COVID-19 Cases')
-    plt.title("Stacked Bar Chart of COVID-19 Cases in the U.S. by NY Cases and Non-NY Cases")
+    plt.ylabel('Number of COVID-19 Cases (thousands)')
+    plt.title("Stacked Bar Chart of COVID-19 Cases (thousands) in the U.S. by NY Cases and Non-NY Cases")
     plt.legend(['NY COVID-19 Cases', 'Non-NY COVID-19 Cases'])
 
     plt.show()
@@ -316,7 +325,7 @@ def main():
     create_percent_bar(set_up_calculations, calculations)
     
     # Create Stacked Bar Chart (NY/NAT COVID-19 Cases)
-    create_stacked_bar(set_up_calculations, calculations)
+    create_stacked_bar(set_up_calculations)
 
     # Create Bitcoin file and visualization
     bitcoin_graph(set_up_calculations, cur, conn)
