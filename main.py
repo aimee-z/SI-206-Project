@@ -141,7 +141,7 @@ def calculate_national_avg (cur,conn):
     print("The national avg % is:")
     print((831313.67)/(831313.67+207627.79))
 
-#Calculate total number & average death rates from Covid-19 Nationally on avergae between selected dates 
+# Calculate total number & average death rates from Covid-19 Nationally on avergae between selected dates 
 '''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average amount of deaths from Covid_Data and returns the national average'''
 def calculate_national_deaths(cur,conn):
     nat_death = ('SELECT avg(deaths) FROM COVID_DATA')
@@ -149,12 +149,12 @@ def calculate_national_deaths(cur,conn):
     print("The national death avg is:")
     print(cur.fetchone()[0])
     conn.commit()
-    #average national death % calculation
+    # average national death % calculation
     print("The national death avg % is:")
     print((44934.48)/(44934.48+14216.471264367816))
     
 
-#Calculate total number & average  of Coviid-19 Cases from NY on Average between selected dates
+# Calculate total number & average  of Coviid-19 Cases from NY on Average between selected dates
 '''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average number of cases from NY_COVID_DATA and returns both the NY average'''
 def calculate_ny_avg (cur,conn):
     ny_covid = ('SELECT avg(total_cases) FROM NY_COVID_DATA')
@@ -163,7 +163,7 @@ def calculate_ny_avg (cur,conn):
     print(cur.fetchone()[0])
     conn.commit()
 
-#Calculate total number & average death rates from Covid-19 in NY on average between selected dates 
+# Calculate total number & average death rates from Covid-19 in NY on average between selected dates 
 '''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average amount of deaths from NY_COVID_DATA and returns the NY average '''
 def calculate_ny_deaths(cur,conn):
     ny_death = ('SELECT avg(deaths) FROM NY_COVID_DATA')
@@ -314,7 +314,7 @@ def create_pie_chart_avg():
     plt.legend(title = "NY vs National Covid-Cases:")
     plt.show()
 
-#Create Pie Chart for NY Covid-19 Death Rates vs National Death Rates  
+# Create Pie Chart for NY Covid-19 Death Rates vs National Death Rates  
 def create_pie_chart_deaths():  
     '''Takes in no inputs. Uses average amount of NY and National Covid-19 related deaths calculated in calculate_national_deaths()
     and calculate_ny_deaths() to return a pie chart comparing the average death rates in NY and nationally over the selected time frame.'''
@@ -333,7 +333,7 @@ def main():
     '''Takes no inputs and returns nothing. Calls the covid_api(), covid_table(), set_up_covid(), ny_covid_api(), ny_covid_table(), 
     set_up_ny_covid(), join_tables(), bitcoin_api(), bitcoin_table(), and set_up_bitcoin(), set_up_calculations(),write_calculation_to_file(),write_diff_to_file(),
     create_percent_bar(), create_stacked_bar(),bitcoin_graph(), calculate_national_avg(),calculate_national_deaths(),calculate_ny_avg (),
-    calculate_ny_deaths(),create_pie_chart_avg(),create_pie_chart_deaths(),functions.
+    calculate_ny_deaths(),create_pie_chart_avg(),and create_pie_chart_deaths() functions.
     Limits the amount of to 25 collected/stored at a time.'''
 
     cur, conn = setUpDatabase('project.db')
@@ -408,22 +408,22 @@ def main():
     # Create Bitcoin file and visualization
     bitcoin_graph(set_up_calculations, cur, conn)
 
-    #calling calculation for National Cases 
+    # Calling calculation for National Cases 
     calculate_national_avg(cur,conn)
 
-    #calling calculation for National Death Rates  
+    # Calling calculation for National Death Rates  
     calculate_national_deaths(cur,conn)
 
-    #calling calculation for NY Case
+    # Calling calculation for NY Case
     calculate_ny_avg (cur,conn)
 
-    #calling calculation for NY Death Rates  
+    # Calling calculation for NY Death Rates  
     calculate_ny_deaths(cur,conn)
 
-    #calling pie chart visualization for average Covid-19 cases (Nationally vs NY) 
+    # Calling pie chart visualization for average Covid-19 cases (Nationally vs NY) 
     create_pie_chart_avg()
 
-    #calling pie chart visualization for average Covid-19 related deaths (Nationally vs NY) 
+    # Calling pie chart visualization for average Covid-19 related deaths (Nationally vs NY) 
     create_pie_chart_deaths()
     
    
