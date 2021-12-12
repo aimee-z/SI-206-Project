@@ -142,7 +142,7 @@ def calculate_national_avg (cur,conn):
     print((831313.67)/(831313.67+207627.79))
 
 # Calculate total number & average death rates from Covid-19 Nationally on avergae between selected dates 
-'''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average amount of deaths from Covid_Data and returns the national average'''
+'''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average amount of deaths from Covid_Data and prints the national average'''
 def calculate_national_deaths(cur,conn):
     nat_death = ('SELECT avg(deaths) FROM COVID_DATA')
     cur.execute(nat_death)
@@ -155,7 +155,7 @@ def calculate_national_deaths(cur,conn):
     
 
 # Calculate total number & average  of Coviid-19 Cases from NY on Average between selected dates
-'''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average number of cases from NY_COVID_DATA and returns both the NY average'''
+'''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average number of cases from NY_COVID_DATA and prints both the NY average'''
 def calculate_ny_avg (cur,conn):
     ny_covid = ('SELECT avg(total_cases) FROM NY_COVID_DATA')
     cur.execute(ny_covid)
@@ -164,7 +164,7 @@ def calculate_ny_avg (cur,conn):
     conn.commit()
 
 # Calculate total number & average death rates from Covid-19 in NY on average between selected dates 
-'''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average amount of deaths from NY_COVID_DATA and returns the NY average '''
+'''Takes in database cursor and connector as inputs. Uses SELECT avg to calculate the average amount of deaths from NY_COVID_DATA and prints the NY average '''
 def calculate_ny_deaths(cur,conn):
     ny_death = ('SELECT avg(deaths) FROM NY_COVID_DATA')
     cur.execute(ny_death)
